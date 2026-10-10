@@ -1,0 +1,1108 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{graphicx}
+\usepackage{siunitx}
+\usepackage[normalem]{ulem}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{hhline}
+\usepackage{calc}
+\usepackage{tabularx}
+\usepackage{threeparttable}
+\usepackage{wrapfig}
+\usepackage{adjustbox}
+\usepackage{hyperref}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+% fallback for those not using the hyperref driver hyperxmp:
+\makeatletter
+\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
+\makeatother
+\hypersetup{
+  pdftitle={Individual Task 2: Sustainable Infrastructure and Responsible Investment Analysis},
+  pdfauthor={Sheikh Mohammad Milton},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Individual Task 2: Sustainable Infrastructure and Responsible
+Investment Analysis}
+\author{Sheikh Mohammad Milton}
+\date{11 October 2026}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{3}
+\tableofcontents
+}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{knitr}\SpecialCharTok{::}\NormalTok{opts\_chunk}\SpecialCharTok{$}\FunctionTok{set}\NormalTok{(}\AttributeTok{echo =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{message =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{warning =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Introduction}\label{introduction}
+
+\subsection{Business context}\label{business-context}
+
+I am an entry-level analyst at an investment firm that finances
+\textbf{sustainable infrastructure} and applies
+\textbf{responsible-investment} principles. My line manager asked for
+four pieces of work:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Most common climate hazards affecting communities globally
+\item
+  Number of planned projects and total funding sought, by region
+\item
+  Ranked list of collaboration / investment opportunities
+\item
+  Best model to predict environmental controversy involvement, with
+  evaluation
+\end{enumerate}
+
+\textbf{How I will work.} For every step I first explain \emph{why} I am
+doing it and \emph{how}, then run the R code, then \emph{interpret} the
+result. All data preparation is done in R (nothing is edited in Excel),
+and I never type in data values by hand; every number comes from the two
+CSV files.
+
+\subsection{Load packages}\label{load-packages}
+
+\begin{verbatim}
+## package 'jtools' successfully unpacked and MD5 sums checked
+## 
+## The downloaded binary packages are in
+##  C:\Users\User\AppData\Local\Temp\RtmpUrLy2y\downloaded_packages
+\end{verbatim}
+
+\section{Data Import and Initial
+Inspection}\label{data-import-and-initial-inspection}
+
+\subsection{Import the dataset}\label{import-the-dataset}
+
+\subsection{Initial Inspection}\label{initial-inspection}
+
+\begin{verbatim}
+## [1] 2590   26
+\end{verbatim}
+
+\begin{verbatim}
+## [1] 7275   26
+\end{verbatim}
+
+\begin{verbatim}
+## spc_tbl_ [2,590 x 26] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+##  $ cityid                : num [1:2590] 1093 1093 1093 1093 1093 ...
+##  $ cityname              : chr [1:2590] "City of Atlanta, GA" "City of Atlanta, GA" "City of Atlanta, GA" "City of Atlanta, GA" ...
+##  $ cityarea              : chr [1:2590] "United States of America" "United States of America" "United States of America" "United States of America" ...
+##  $ cityregion            : chr [1:2590] "North America" "North America" "North America" "North America" ...
+##  $ area_km               : num [1:2590] 352 352 352 352 352 ...
+##  $ area_natural          : chr [1:2590] "51-60%" "51-60%" "51-60%" "51-60%" ...
+##  $ area_population       : num [1:2590] 532115 532115 532115 532115 532115 ...
+##  $ econ_gdpt             : num [1:2590] 3.08e+13 3.08e+13 3.08e+13 3.08e+13 3.08e+13 ...
+##  $ econ_gdtg             : num [1:2590] 2.16 2.16 2.16 2.16 2.16 ...
+##  $ econ_emp              : num [1:2590] 3.64 3.64 3.64 3.64 3.64 ...
+##  $ econ_inf              : num [1:2590] 2.8 2.8 2.8 2.8 2.8 ...
+##  $ econ_inv              : num [1:2590] NA NA NA NA NA NA NA NA NA NA ...
+##  $ econ_spend            : num [1:2590] NA NA NA NA NA NA NA NA NA NA ...
+##  $ econ_rd               : num [1:2590] 3.45 3.45 3.45 3.45 3.45 ...
+##  $ econ_export           : num [1:2590] NA NA NA NA NA NA NA NA NA NA ...
+##  $ env_ghg               : num [1:2590] 5891 5891 5891 5891 5891 ...
+##  $ soc_water             : num [1:2590] 97.6 97.6 97.6 97.6 97.6 ...
+##  $ soc_sanit             : num [1:2590] 97 97 97 97 97 ...
+##  $ climate_hazard        : chr [1:2590] "Extreme heat: Around 200 people die in the City of Atlanta annually with heat stroke related issues. Elderly pe"| __truncated__ "Extreme heat: Around 200 people die in the City of Atlanta annually with heat stroke related issues. Elderly pe"| __truncated__ "Extreme heat: Around 200 people die in the City of Atlanta annually with heat stroke related issues. Elderly pe"| __truncated__ "Extreme heat: Around 200 people die in the City of Atlanta annually with heat stroke related issues. Elderly pe"| __truncated__ ...
+##  $ collab_civil          : num [1:2590] 1 1 1 1 1 1 1 1 1 1 ...
+##  $ collab_business       : num [1:2590] NA NA NA NA NA NA NA NA NA 1 ...
+##  $ collab_public         : num [1:2590] NA NA NA NA NA NA NA NA NA 1 ...
+##  $ project_fundingmodel  : chr [1:2590] "Public finance- own budget|Carbon markets" "Public finance- national government" "Bonds|Other: penny tax" "Bonds" ...
+##  $ project_totalcost     : num [1:2590] 1.10e+05 2.50e+06 7.50e+08 1.40e+07 5.38e+05 ...
+##  $ project_investmentcost: num [1:2590] NA 2.50e+06 7.50e+08 NA 5.00e+06 NA 2.68e+06 NA NA 4.00e+09 ...
+##  $ project_info          : chr [1:2590] "Landscape and Jurisdictional Approaches - City of Atlanta's Carbon Credit Program: The City of Atlanta launched"| __truncated__ "Buildings - WeatheRISE Atlanta: The City of Atlanta has invested $2 million through the American Rescue Plan Ac"| __truncated__ "Transport - Moving Atlanta Forward: 2022 Infrastructure Package: Atlanta voters approved three ballot measures "| __truncated__ "Water management - City of Atlanta Department of Watershed Management Environmental Impact Bond for Green Infra"| __truncated__ ...
+##  - attr(*, "spec")=
+##   .. cols(
+##   ..   cityid = col_double(),
+##   ..   cityname = col_character(),
+##   ..   cityarea = col_character(),
+##   ..   cityregion = col_character(),
+##   ..   area_km = col_double(),
+##   ..   area_natural = col_character(),
+##   ..   area_population = col_double(),
+##   ..   econ_gdpt = col_double(),
+##   ..   econ_gdtg = col_double(),
+##   ..   econ_emp = col_double(),
+##   ..   econ_inf = col_double(),
+##   ..   econ_inv = col_double(),
+##   ..   econ_spend = col_double(),
+##   ..   econ_rd = col_double(),
+##   ..   econ_export = col_double(),
+##   ..   env_ghg = col_double(),
+##   ..   soc_water = col_double(),
+##   ..   soc_sanit = col_double(),
+##   ..   climate_hazard = col_character(),
+##   ..   collab_civil = col_double(),
+##   ..   collab_business = col_double(),
+##   ..   collab_public = col_double(),
+##   ..   project_fundingmodel = col_character(),
+##   ..   project_totalcost = col_double(),
+##   ..   project_investmentcost = col_double(),
+##   ..   project_info = col_character()
+##   .. )
+##  - attr(*, "problems")=<externalptr>
+\end{verbatim}
+
+\begin{verbatim}
+## spc_tbl_ [7,275 x 26] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+##  $ firm_id    : chr [1:7275] "OESTm.BA" "IEBm.BA" "VALOm.BA" "TRANm.BA" ...
+##  $ firm_name  : chr [1:7275] "Grupo Concesionario del Oeste SA" "IEB Construcciones SA" "Banco de Valores SA" "Compania de Transporte de Energia Electrica en Alta Tension Transener SA" ...
+##  $ firm_hq    : chr [1:7275] "Argentina" "Argentina" "Argentina" "Argentina" ...
+##  $ industry   : chr [1:7275] "Construction & Engineering" "Construction & Engineering" "Banking Services" "Electric Utilities & IPPs" ...
+##  $ env_score  : num [1:7275] 11.3 15.1 47.1 18.1 82 ...
+##  $ env_product: num [1:7275] 0 0 0 1 0 0 0 1 0 0 ...
+##  $ env_co2s1  : num [1:7275] NA NA NA NA 9413830 ...
+##  $ env_co2s2  : num [1:7275] NA NA NA NA 1397800 ...
+##  $ env_co2s3  : num [1:7275] NA NA NA NA 76822116 ...
+##  $ env_energy : num [1:7275] NA NA 2.61e+03 NA 1.38e+08 ...
+##  $ env_contro : num [1:7275] 0 0 0 0 1 0 0 0 0 0 ...
+##  $ pol_climate: num [1:7275] 0 0 0 0 1 0 0 0 0 0 ...
+##  $ pol_energy : num [1:7275] 0 0 0 0 1 0 0 0 0 0 ...
+##  $ pol_envsup : num [1:7275] 0 0 0 0 1 1 0 0 1 0 ...
+##  $ pol_bio    : num [1:7275] 0 1 0 1 1 0 1 0 0 0 ...
+##  $ pol_socsup : num [1:7275] 0 0 0 0 1 1 0 0 1 0 ...
+##  $ fin_asset  : num [1:7275] 9.48e+07 1.49e+07 8.75e+08 2.87e+08 1.65e+10 ...
+##  $ fin_rev    : num [1:7275] 3.45e+07 1.75e+07 3.35e+08 1.06e+08 4.48e+09 ...
+##  $ fin_cor    : num [1:7275] 1.91e+07 1.91e+07 2.31e+08 8.41e+07 3.69e+09 ...
+##  $ fin_capex  : num [1:7275] 8.62e+05 1.02e+04 7.02e+04 1.36e+07 1.30e+09 ...
+##  $ fin_roa    : num [1:7275] 39.67 -57.18 1.31 2.86 -12.37 ...
+##  $ fin_roe    : num [1:7275] 70.09 -536.81 19.97 3.97 -34.42 ...
+##  $ fin_ebitda : num [1:7275] 17.1 -19.8 18 23.3 22.2 ...
+##  $ fin_cr     : num [1:7275] 1.395 0.579 NA 1.252 0.901 ...
+##  $ fin_dte    : num [1:7275] -0.0675 6.682 -14.9964 -0.0654 0.8252 ...
+##  $ marketcap  : num [1:7275] 4.77e+07 9.02e+06 1.50e+08 3.81e+08 5.36e+09 ...
+##  - attr(*, "spec")=
+##   .. cols(
+##   ..   firm_id = col_character(),
+##   ..   firm_name = col_character(),
+##   ..   firm_hq = col_character(),
+##   ..   industry = col_character(),
+##   ..   env_score = col_double(),
+##   ..   env_product = col_double(),
+##   ..   env_co2s1 = col_double(),
+##   ..   env_co2s2 = col_double(),
+##   ..   env_co2s3 = col_double(),
+##   ..   env_energy = col_double(),
+##   ..   env_contro = col_double(),
+##   ..   pol_climate = col_double(),
+##   ..   pol_energy = col_double(),
+##   ..   pol_envsup = col_double(),
+##   ..   pol_bio = col_double(),
+##   ..   pol_socsup = col_double(),
+##   ..   fin_asset = col_double(),
+##   ..   fin_rev = col_double(),
+##   ..   fin_cor = col_double(),
+##   ..   fin_capex = col_double(),
+##   ..   fin_roa = col_double(),
+##   ..   fin_roe = col_double(),
+##   ..   fin_ebitda = col_double(),
+##   ..   fin_cr = col_double(),
+##   ..   fin_dte = col_double(),
+##   ..   marketcap = col_double()
+##   .. )
+##  - attr(*, "problems")=<externalptr>
+\end{verbatim}
+
+\begin{verbatim}
+## Rows: 2,590
+## Columns: 26
+## $ cityid                 <dbl> 1093, 1093, 1093, 1093, 1093, 1093, 1093, 1093,~
+## $ cityname               <chr> "City of Atlanta, GA", "City of Atlanta, GA", "~
+## $ cityarea               <chr> "United States of America", "United States of A~
+## $ cityregion             <chr> "North America", "North America", "North Americ~
+## $ area_km                <dbl> 351.53, 351.53, 351.53, 351.53, 351.53, 351.53,~
+## $ area_natural           <chr> "51-60%", "51-60%", "51-60%", "51-60%", "51-60%~
+## $ area_population        <dbl> 532115, 532115, 532115, 532115, 532115, 532115,~
+## $ econ_gdpt              <dbl> 3.076970e+13, 3.076970e+13, 3.076970e+13, 3.076~
+## $ econ_gdtg              <dbl> 2.161382, 2.161382, 2.161382, 2.161382, 2.16138~
+## $ econ_emp               <dbl> 3.638, 3.638, 3.638, 3.638, 3.638, 3.638, 3.638~
+## $ econ_inf               <dbl> 2.801236, 2.801236, 2.801236, 2.801236, 2.80123~
+## $ econ_inv               <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,~
+## $ econ_spend             <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,~
+## $ econ_rd                <dbl> 3.4472, 3.4472, 3.4472, 3.4472, 3.4472, 3.4472,~
+## $ econ_export            <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,~
+## $ env_ghg                <dbl> 5890.9864, 5890.9864, 5890.9864, 5890.9864, 589~
+## $ soc_water              <dbl> 97.5662, 97.5662, 97.5662, 97.5662, 97.5662, 97~
+## $ soc_sanit              <dbl> 96.9767, 96.9767, 96.9767, 96.9767, 96.9767, 96~
+## $ climate_hazard         <chr> "Extreme heat: Around 200 people die in the Cit~
+## $ collab_civil           <dbl> 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,~
+## $ collab_business        <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, 1, 1, 1, 1,~
+## $ collab_public          <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, 1, 1, 1, 1,~
+## $ project_fundingmodel   <chr> "Public finance- own budget|Carbon markets", "P~
+## $ project_totalcost      <dbl> 110000, 2500000, 750000000, 14000000, 538000, 8~
+## $ project_investmentcost <dbl> NA, 2500000, 750000000, NA, 5000000, NA, 268000~
+## $ project_info           <chr> "Landscape and Jurisdictional Approaches - City~
+\end{verbatim}
+
+\begin{verbatim}
+## Rows: 7,275
+## Columns: 26
+## $ firm_id     <chr> "OESTm.BA", "IEBm.BA", "VALOm.BA", "TRANm.BA", "YPFDm.BA",~
+## $ firm_name   <chr> "Grupo Concesionario del Oeste SA", "IEB Construcciones SA~
+## $ firm_hq     <chr> "Argentina", "Argentina", "Argentina", "Argentina", "Argen~
+## $ industry    <chr> "Construction & Engineering", "Construction & Engineering"~
+## $ env_score   <dbl> 11.2824897, 15.1491630, 47.1022298, 18.0940732, 81.9618468~
+## $ env_product <dbl> 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ env_co2s1   <dbl> NA, NA, NA, NA, 9413830.00, NA, NA, NA, 6395399.26, NA, 63~
+## $ env_co2s2   <dbl> NA, NA, NA, NA, 1397800.00, NA, 30596.00, NA, 64562.13, NA~
+## $ env_co2s3   <dbl> NA, NA, NA, NA, 76822116.00, NA, NA, NA, NA, NA, NA, NA, N~
+## $ env_energy  <dbl> NA, NA, 2614.55, NA, 138474944.00, 16844.70, 545243.00, NA~
+## $ env_contro  <dbl> 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0~
+## $ pol_climate <dbl> 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0~
+## $ pol_energy  <dbl> 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0~
+## $ pol_envsup  <dbl> 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1~
+## $ pol_bio     <dbl> 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1~
+## $ pol_socsup  <dbl> 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1~
+## $ fin_asset   <dbl> 94782327, 14903095, 874793010, 287010908, 16484454660, 123~
+## $ fin_rev     <dbl> 34506432, 17549237, 334939543, 106445447, 4475258214, -388~
+## $ fin_cor     <dbl> 19120172, 19121223, 231097215, 84140077, 3693614882, NA, 1~
+## $ fin_capex   <dbl> 8.618016e+05, 1.020169e+04, 7.015846e+04, 1.363945e+07, 1.~
+## $ fin_roa     <dbl> 39.6742770, -57.1777490, 1.3089541, 2.8596130, -12.3656923~
+## $ fin_roe     <dbl> 70.0940329, -536.8099512, 19.9668639, 3.9688974, -34.41635~
+## $ fin_ebitda  <dbl> 17.06969, -19.76489, 18.03430, 23.34112, 22.15402, NA, -1.~
+## $ fin_cr      <dbl> 1.39451, 0.57921, NA, 1.25172, 0.90124, NA, 0.83902, 0.776~
+## $ fin_dte     <dbl> -0.06749, 6.68198, -14.99643, -0.06538, 0.82519, -0.44479,~
+## $ marketcap   <dbl> 47659547, 9020619, 150012955, 381180140, 5355809755, 10845~
+\end{verbatim}
+
+ 
+  \providecommand{\huxb}[2]{\arrayrulecolor[RGB]{#1}\global\arrayrulewidth=#2pt}
+  \providecommand{\huxvb}[2]{\color[RGB]{#1}\vrule width #2pt}
+  \providecommand{\huxtpad}[1]{\rule{0pt}{#1}}
+  \providecommand{\huxbpad}[1]{\rule[-#1]{0pt}{#1}}
+
+\begin{table}[ht]
+\begin{centerbox}
+\begin{threeparttable}
+ \label{tab:initial-inspection}
+\setlength{\tabcolsep}{0pt}
+\begin{tabular}{l l l l l l l l l l l l l l l l l l l l l l l l l l}
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}-}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{cityid} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} \textbf{cityname} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} \textbf{cityarea} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} \textbf{cityregion} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{area\_km} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} \textbf{area\_natural} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{area\_population} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{econ\_gdpt} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{econ\_gdtg} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{econ\_emp} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{econ\_inf} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{econ\_inv} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{econ\_spend} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{econ\_rd} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{econ\_export} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{env\_ghg} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{soc\_water} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{soc\_sanit} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} \textbf{climate\_hazard} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{collab\_civil} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{collab\_business} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{collab\_public} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} \textbf{project\_fundingmodel} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{project\_totalcost} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{project\_investmentcost} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0.4}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} \textbf{project\_info} \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}-}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.09e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} City of Atlanta, GA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} United States of America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} North America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 352\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} 51-60\% \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.32e+05 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.08e+13 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.16 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.64 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.8 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.45 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.89e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97.6 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Extreme heat: Around 200 people die in the City of Atlanta annually with heat stroke related issues. Elderly people are at the most risk of heat related deaths and other marginalized communities include children and low-income households that have sub-optimal A/C infrastructure. Atlanta reached a heat record by having 91 days out of the year with temperatures higher than 90 degrees Fahrenheit, with a yearly average of 51 degrees Fahrenheit. The first half of 2022 was the fourth hottest on record. Lower income neighborhoods, often with minimal vegetation and heavy amounts of black asphalt often retain heat and high temperatures. The CoA is currently partnering with Urban Heat ATL, a collaborative partnership between universities like Georgia Tech and Spelman, Community Groups such as West Atlanta Watershed Alliance, Harambeee House, and Partnership for Southern Equity to track urban heat data, and utilize community engagement to support policies and programs to combat urban heat. This program has collected over 1.5 million data points on urban heat communities to find temperature differences in Atlanta's most affected/vulnerable communities. https://urbanheatatl.org/data/https://statesatrisk.org/georgia/extreme-heat This year, with leadership from councilmember Bakhtiari, Georgia Tech developed a Heat and Flood Assessment Report. This study includes heat vulnerability scores by neighborhood, canopy expansion scenarios (street trees, greening percentage, cool roofs), a climate resilience scorecard for downtown, and recommendations for policies to reduce heat and climate related deaths in Atlanta. https://drive.google.com/file/d/1v3lKX-LO4RnG5tTen5HuUIXX4a5uAkZN/view (Presentation)https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view (Data) $|$ Drought: Water scarcity: Droughts can affect the supply of potable water but it also affects the surrounding regions which provide food for the city. In 2008 and 2009, the city had required restrictions on water usage. Low income families lose resources in affordable grocery stores due to lack of access to healthy fruits and vegetables from farms suffering from drought. Also, minorities or low-income people living in older homes can suffer from poor insulation or less than optimal A/C may be in need of more water in hotter water but water-scarcity can put many households in danger of dehydration and other health issues.The city is extremely dependent on surface water. Atlanta receives 70\% of its municipal water from Lake Lanier and part of the Chattahoochee River Basin. There has been experienced debates on water usage and shortages between Georgia, Alabama, and Florida. Fulton county is expected to need over 300 million gallons of water per day by 2035. In years past the City has had only 7 days to 4 weeks of emergency backup water supply, however, the new Westside Quarry Park will add 30 - 60 days of emergency backup water supply. The Department of Watershed Management has a goal in its 2022 Strategic Action Plan to always have at least a 30-day emergency backup water supply. 100atl.comhttps://www.nrdc.org/stories/needing-water-georgia-stirs-200-year-old-dispute-its-northern-neighbor\#:\~{}:text=Atlanta's\%20Fulton\%20County\%20is\%20expected,director\%20of\%20Georgia\%20Conservation\%20Voters. https://www.wabe.org/atlantas-emergency-water-supply-project-at-bellwood-quarry-is-complete/ $|$ Snow and ice: There's been an increase in blizzards and heavy snowstorms. For snowfall, the city has averaged around 2.2 inches in the winter months. The most notable snow storm, labeled $\backslash$'Snowmageddon'' on January 28th, 2014, with 2.6 inches of snow, stranded cars, school children, and impacted all local businesses and Hartsfield Jackson Airport. Atlanta was unprepared with the necessary resources such as salting trucks. An additional snow storm occurred in 2018 disrupting more than 12,800 miles of Georgia highways. This severely affects the city's transportation systems, power access, and the need for warming shelters. The elderly, those living in substandard housing or homeless populations are the most vulnerable. After these snow storms the CoA decided to invest in icing trucks and salt supplies to combat storms more effectively. https://www.accuweather.com/en/winter-weather/atlanta-and-snowfall-a-rocky-history-to-say-the-least/1124310https://www.atlantaga.gov/Home/Components/News/News/14005/672 $|$ Heavy precipitation: Rain storms cause floods in the city overloading the existing sewage system and causing spills in the only source of potable water for the City. Vulnerable populations that are located in low valleys or near poorly constructed roads that have high rates of flooding are especially heavily impacted by increasing occurrences of heavy, sustained rain storms. In 2009 the CoA had \$193 million in damages and 16,900 homes were destroyed due to heavy flooding. As an example, Proctor Creek has flooded multiple times in the past decade leading to home and water damage in historically LMI homes in the westside of Atlanta. The CoA with the Environmental Protection Agency (EPA) and community stakeholders work to replenish the watershed and create sustainable watershed standards. The Proctor Creek Watershed Story Map, a website from this collaboration, has provided resources about sustainable development and policy implications in the watershed. This issue has increased demand for public services and population displacement. This is why the Department of Watershed Management has committed to creating storm-water and green infrastructure projects / funding to help mitigate these impacts during storms across Atlanta, and especially in the Westside of Atlanta.https://www.epa.gov/sciencematters/helping-engage-proctor-creek-community-members-stewards-their-watershedhttps://www.atlantawatershed.org/dwm-projects/ $|$ Extreme cold: Extreme cold temperatures cause pipes to burst in vulnerable populations that have older infrastructure not updated and suited for colder weather. Burst pipes cause additional damages and repair costs alongside inaccessibility to water, flooding, and other essential needs like housing. $|$ Biodiversity loss: The CoA has a major problem with the loss of biodiversity in its trees. The city ranks first in tree biodiversity loss in the U.S., losing 14\% of all native species such as the Eastern White Pine and species such as the Cucumber Magnolia. Biodiversity loss or overall tree canopy loss affects the wildlife and can add to the negative impact of invasive species. Less canopy cover can exaggerate heat risk for elderly and homeless communities. 100atl.com $|$ Heat stress: In Atlanta, most of the heat related deaths have occurred from people experiencing homelessness, individuals with dementia who wandered off in the heat, older people who were doing yardwork outside, young children left in hot cars, according to a review of an autopsy report over the past five years. In 2023, the City of Atlanta released a study on which neighborhoods are most vulnerable to heat strokes and even death. https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view. Atlanta's predominantly Black westside neighborhoods are more vulnerable to extremely high temperatures and face higher burdens of climate impacts. https://atlanta.capitalbnews.org/heat-vulnerability-black/. In Metro Atlanta, days over 100 degrees are set to double by 2053. https://www.ajc.com/news/in-metro-atlanta-days-over-100-degrees-to-double-by-2053-report-says/W5REPIFDTFAANBWWMI4WWA4QY4/ \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Public finance- own budget$|$Carbon markets \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.1e+05\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0.4}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Landscape and Jurisdictional Approaches - City of Atlanta's Carbon Credit Program: The City of Atlanta launched its urban forest carbon credit program in 2022 with the Lake Charlotte Nature Preserve Carbon Credit Project. This initiative preserves 196 acres of ecologically high value forest and has issued 36,265 Carbon Plus credits through a 40 year urban tree preservation protocol. The program is designed to generate revenue over more than four decades that supports preservation and stewardship, delivering co benefits in public health, air quality, stormwater management, and energy savings. Currently 27,717 credits are available for purchase, with credits issued annually at approximately 9,239 per year for 2023, 2024, and 2025.$\backslash$n$\backslash$nBuilding on this success, the City is now expanding the program to include four newly acquired forested nature preserve properties: Southwest Nature Preserve, Utoy Creek Nature Preserve, Mount Zion Nature Preserve, and South River Nature Preserve, totaling approximately 252 acres. These areas were acquired between late 2022 and 2023 through deed, park impact fees, and tree trust funds.$\backslash$n$\backslash$nThis expansion continues the strategy of leveraging carbon credit revenue to preserve mature urban canopies from development pressures, bolster climate resilience, and fund ecosystem stewardship. It aligns with broader City goals of enhancing equitable greenspace access within walking distance for all residents, advancing greenhouse gas reduction efforts, and strengthening resilience through nature based strategies. Importantly, this carbon credit model is structured to continue scaling across all future forested property acquisitions the City makes, encouraging ongoing preservation while also generating additional revenue that can be reinvested to compound environmental and community impact over time.$\backslash$n$\backslash$nThe City is actively seeking partners to purchase these premium Carbon Plus credits and help spread the word about their availability. By connecting with buyers who value high quality, community centered offsets, the City can accelerate reinvestment in further preservation and resilience projects. At the same time, Atlanta hopes that showcasing this model will inspire other local governments to launch similar initiatives, demonstrating how urban forest preservation can serve as both a climate mitigation tool and a revenue generating pathway to fund long term adaptation.$\backslash$n$\backslash$nProject documentation and credits available for purchase can be found here. Lake Charlotte Nature Preserve Carbon Credit Project Page : https://www.cityforestcredits.org/carbon-credits/carbon-registry/atlanta-forest-carbon-offsets/$\backslash$n$\backslash$nCity of Atlanta's Carbon Credit Program Expansion: https://www.cityforestcredits.org/carbon-credits/carbon-registry/city-of-atlanta-carbon-credit-program-2024/$\backslash$n$\backslash$n \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.09e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} City of Atlanta, GA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} United States of America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} North America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 352\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} 51-60\% \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.32e+05 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.08e+13 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.16 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.64 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.8 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.45 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.89e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97.6 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Extreme heat: Around 200 people die in the City of Atlanta annually with heat stroke related issues. Elderly people are at the most risk of heat related deaths and other marginalized communities include children and low-income households that have sub-optimal A/C infrastructure. Atlanta reached a heat record by having 91 days out of the year with temperatures higher than 90 degrees Fahrenheit, with a yearly average of 51 degrees Fahrenheit. The first half of 2022 was the fourth hottest on record. Lower income neighborhoods, often with minimal vegetation and heavy amounts of black asphalt often retain heat and high temperatures. The CoA is currently partnering with Urban Heat ATL, a collaborative partnership between universities like Georgia Tech and Spelman, Community Groups such as West Atlanta Watershed Alliance, Harambeee House, and Partnership for Southern Equity to track urban heat data, and utilize community engagement to support policies and programs to combat urban heat. This program has collected over 1.5 million data points on urban heat communities to find temperature differences in Atlanta's most affected/vulnerable communities. https://urbanheatatl.org/data/https://statesatrisk.org/georgia/extreme-heat This year, with leadership from councilmember Bakhtiari, Georgia Tech developed a Heat and Flood Assessment Report. This study includes heat vulnerability scores by neighborhood, canopy expansion scenarios (street trees, greening percentage, cool roofs), a climate resilience scorecard for downtown, and recommendations for policies to reduce heat and climate related deaths in Atlanta. https://drive.google.com/file/d/1v3lKX-LO4RnG5tTen5HuUIXX4a5uAkZN/view (Presentation)https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view (Data) $|$ Drought: Water scarcity: Droughts can affect the supply of potable water but it also affects the surrounding regions which provide food for the city. In 2008 and 2009, the city had required restrictions on water usage. Low income families lose resources in affordable grocery stores due to lack of access to healthy fruits and vegetables from farms suffering from drought. Also, minorities or low-income people living in older homes can suffer from poor insulation or less than optimal A/C may be in need of more water in hotter water but water-scarcity can put many households in danger of dehydration and other health issues.The city is extremely dependent on surface water. Atlanta receives 70\% of its municipal water from Lake Lanier and part of the Chattahoochee River Basin. There has been experienced debates on water usage and shortages between Georgia, Alabama, and Florida. Fulton county is expected to need over 300 million gallons of water per day by 2035. In years past the City has had only 7 days to 4 weeks of emergency backup water supply, however, the new Westside Quarry Park will add 30 - 60 days of emergency backup water supply. The Department of Watershed Management has a goal in its 2022 Strategic Action Plan to always have at least a 30-day emergency backup water supply. 100atl.comhttps://www.nrdc.org/stories/needing-water-georgia-stirs-200-year-old-dispute-its-northern-neighbor\#:\~{}:text=Atlanta's\%20Fulton\%20County\%20is\%20expected,director\%20of\%20Georgia\%20Conservation\%20Voters. https://www.wabe.org/atlantas-emergency-water-supply-project-at-bellwood-quarry-is-complete/ $|$ Snow and ice: There's been an increase in blizzards and heavy snowstorms. For snowfall, the city has averaged around 2.2 inches in the winter months. The most notable snow storm, labeled $\backslash$'Snowmageddon'' on January 28th, 2014, with 2.6 inches of snow, stranded cars, school children, and impacted all local businesses and Hartsfield Jackson Airport. Atlanta was unprepared with the necessary resources such as salting trucks. An additional snow storm occurred in 2018 disrupting more than 12,800 miles of Georgia highways. This severely affects the city's transportation systems, power access, and the need for warming shelters. The elderly, those living in substandard housing or homeless populations are the most vulnerable. After these snow storms the CoA decided to invest in icing trucks and salt supplies to combat storms more effectively. https://www.accuweather.com/en/winter-weather/atlanta-and-snowfall-a-rocky-history-to-say-the-least/1124310https://www.atlantaga.gov/Home/Components/News/News/14005/672 $|$ Heavy precipitation: Rain storms cause floods in the city overloading the existing sewage system and causing spills in the only source of potable water for the City. Vulnerable populations that are located in low valleys or near poorly constructed roads that have high rates of flooding are especially heavily impacted by increasing occurrences of heavy, sustained rain storms. In 2009 the CoA had \$193 million in damages and 16,900 homes were destroyed due to heavy flooding. As an example, Proctor Creek has flooded multiple times in the past decade leading to home and water damage in historically LMI homes in the westside of Atlanta. The CoA with the Environmental Protection Agency (EPA) and community stakeholders work to replenish the watershed and create sustainable watershed standards. The Proctor Creek Watershed Story Map, a website from this collaboration, has provided resources about sustainable development and policy implications in the watershed. This issue has increased demand for public services and population displacement. This is why the Department of Watershed Management has committed to creating storm-water and green infrastructure projects / funding to help mitigate these impacts during storms across Atlanta, and especially in the Westside of Atlanta.https://www.epa.gov/sciencematters/helping-engage-proctor-creek-community-members-stewards-their-watershedhttps://www.atlantawatershed.org/dwm-projects/ $|$ Extreme cold: Extreme cold temperatures cause pipes to burst in vulnerable populations that have older infrastructure not updated and suited for colder weather. Burst pipes cause additional damages and repair costs alongside inaccessibility to water, flooding, and other essential needs like housing. $|$ Biodiversity loss: The CoA has a major problem with the loss of biodiversity in its trees. The city ranks first in tree biodiversity loss in the U.S., losing 14\% of all native species such as the Eastern White Pine and species such as the Cucumber Magnolia. Biodiversity loss or overall tree canopy loss affects the wildlife and can add to the negative impact of invasive species. Less canopy cover can exaggerate heat risk for elderly and homeless communities. 100atl.com $|$ Heat stress: In Atlanta, most of the heat related deaths have occurred from people experiencing homelessness, individuals with dementia who wandered off in the heat, older people who were doing yardwork outside, young children left in hot cars, according to a review of an autopsy report over the past five years. In 2023, the City of Atlanta released a study on which neighborhoods are most vulnerable to heat strokes and even death. https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view. Atlanta's predominantly Black westside neighborhoods are more vulnerable to extremely high temperatures and face higher burdens of climate impacts. https://atlanta.capitalbnews.org/heat-vulnerability-black/. In Metro Atlanta, days over 100 degrees are set to double by 2053. https://www.ajc.com/news/in-metro-atlanta-days-over-100-degrees-to-double-by-2053-report-says/W5REPIFDTFAANBWWMI4WWA4QY4/ \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Public finance- national government \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.5e+06\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.5e+06\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0.4}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Buildings - WeatheRISE Atlanta: The City of Atlanta has invested \$2 million through the American Rescue Plan Act funds, which has aided in updating around 100+ homes with lighting, HVAC, insulation, and other issues with specific energy burdened neighbors and old buildings. This program has shifted to be run by three non-profits instead of the City: Greenlink Analytics, Sustainable Georgia Futures, and Partners in Action for Healthy Living (PAHL) to move this project forward to reduce energy burden in the city. $\backslash$n$\backslash$nSolar for All termination impacts: The City of Atlanta was expecting to receive an additional \$2 million to support and scale WeatheRISE Atlanta's audits, energy efficiency retrofits, and pairing these with solar. However, just a few weeks ago the EPA terminated their contracts for all Solar For All grant recipients, so this is detrimental to scaling the impact and continued capacity to support this program. More funding is needed to reach the 10\% energy burden reduction goal, but Google has donated \$300,000 to support WeatheRISE Atlanta and the City has recently also invested an additional \$200,000 from the Atlanta Community Energy Fund. However, new funding, partners, and models are needed to replace the funding gap in the wake of the sudden Solar For All contract terminations. $\backslash$n$\backslash$nLink: https://www.100atl.com/weatherise-atl \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.09e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} City of Atlanta, GA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} United States of America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} North America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 352\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} 51-60\% \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.32e+05 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.08e+13 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.16 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.64 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.8 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.45 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.89e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97.6 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Extreme heat: Around 200 people die in the City of Atlanta annually with heat stroke related issues. Elderly people are at the most risk of heat related deaths and other marginalized communities include children and low-income households that have sub-optimal A/C infrastructure. Atlanta reached a heat record by having 91 days out of the year with temperatures higher than 90 degrees Fahrenheit, with a yearly average of 51 degrees Fahrenheit. The first half of 2022 was the fourth hottest on record. Lower income neighborhoods, often with minimal vegetation and heavy amounts of black asphalt often retain heat and high temperatures. The CoA is currently partnering with Urban Heat ATL, a collaborative partnership between universities like Georgia Tech and Spelman, Community Groups such as West Atlanta Watershed Alliance, Harambeee House, and Partnership for Southern Equity to track urban heat data, and utilize community engagement to support policies and programs to combat urban heat. This program has collected over 1.5 million data points on urban heat communities to find temperature differences in Atlanta's most affected/vulnerable communities. https://urbanheatatl.org/data/https://statesatrisk.org/georgia/extreme-heat This year, with leadership from councilmember Bakhtiari, Georgia Tech developed a Heat and Flood Assessment Report. This study includes heat vulnerability scores by neighborhood, canopy expansion scenarios (street trees, greening percentage, cool roofs), a climate resilience scorecard for downtown, and recommendations for policies to reduce heat and climate related deaths in Atlanta. https://drive.google.com/file/d/1v3lKX-LO4RnG5tTen5HuUIXX4a5uAkZN/view (Presentation)https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view (Data) $|$ Drought: Water scarcity: Droughts can affect the supply of potable water but it also affects the surrounding regions which provide food for the city. In 2008 and 2009, the city had required restrictions on water usage. Low income families lose resources in affordable grocery stores due to lack of access to healthy fruits and vegetables from farms suffering from drought. Also, minorities or low-income people living in older homes can suffer from poor insulation or less than optimal A/C may be in need of more water in hotter water but water-scarcity can put many households in danger of dehydration and other health issues.The city is extremely dependent on surface water. Atlanta receives 70\% of its municipal water from Lake Lanier and part of the Chattahoochee River Basin. There has been experienced debates on water usage and shortages between Georgia, Alabama, and Florida. Fulton county is expected to need over 300 million gallons of water per day by 2035. In years past the City has had only 7 days to 4 weeks of emergency backup water supply, however, the new Westside Quarry Park will add 30 - 60 days of emergency backup water supply. The Department of Watershed Management has a goal in its 2022 Strategic Action Plan to always have at least a 30-day emergency backup water supply. 100atl.comhttps://www.nrdc.org/stories/needing-water-georgia-stirs-200-year-old-dispute-its-northern-neighbor\#:\~{}:text=Atlanta's\%20Fulton\%20County\%20is\%20expected,director\%20of\%20Georgia\%20Conservation\%20Voters. https://www.wabe.org/atlantas-emergency-water-supply-project-at-bellwood-quarry-is-complete/ $|$ Snow and ice: There's been an increase in blizzards and heavy snowstorms. For snowfall, the city has averaged around 2.2 inches in the winter months. The most notable snow storm, labeled $\backslash$'Snowmageddon'' on January 28th, 2014, with 2.6 inches of snow, stranded cars, school children, and impacted all local businesses and Hartsfield Jackson Airport. Atlanta was unprepared with the necessary resources such as salting trucks. An additional snow storm occurred in 2018 disrupting more than 12,800 miles of Georgia highways. This severely affects the city's transportation systems, power access, and the need for warming shelters. The elderly, those living in substandard housing or homeless populations are the most vulnerable. After these snow storms the CoA decided to invest in icing trucks and salt supplies to combat storms more effectively. https://www.accuweather.com/en/winter-weather/atlanta-and-snowfall-a-rocky-history-to-say-the-least/1124310https://www.atlantaga.gov/Home/Components/News/News/14005/672 $|$ Heavy precipitation: Rain storms cause floods in the city overloading the existing sewage system and causing spills in the only source of potable water for the City. Vulnerable populations that are located in low valleys or near poorly constructed roads that have high rates of flooding are especially heavily impacted by increasing occurrences of heavy, sustained rain storms. In 2009 the CoA had \$193 million in damages and 16,900 homes were destroyed due to heavy flooding. As an example, Proctor Creek has flooded multiple times in the past decade leading to home and water damage in historically LMI homes in the westside of Atlanta. The CoA with the Environmental Protection Agency (EPA) and community stakeholders work to replenish the watershed and create sustainable watershed standards. The Proctor Creek Watershed Story Map, a website from this collaboration, has provided resources about sustainable development and policy implications in the watershed. This issue has increased demand for public services and population displacement. This is why the Department of Watershed Management has committed to creating storm-water and green infrastructure projects / funding to help mitigate these impacts during storms across Atlanta, and especially in the Westside of Atlanta.https://www.epa.gov/sciencematters/helping-engage-proctor-creek-community-members-stewards-their-watershedhttps://www.atlantawatershed.org/dwm-projects/ $|$ Extreme cold: Extreme cold temperatures cause pipes to burst in vulnerable populations that have older infrastructure not updated and suited for colder weather. Burst pipes cause additional damages and repair costs alongside inaccessibility to water, flooding, and other essential needs like housing. $|$ Biodiversity loss: The CoA has a major problem with the loss of biodiversity in its trees. The city ranks first in tree biodiversity loss in the U.S., losing 14\% of all native species such as the Eastern White Pine and species such as the Cucumber Magnolia. Biodiversity loss or overall tree canopy loss affects the wildlife and can add to the negative impact of invasive species. Less canopy cover can exaggerate heat risk for elderly and homeless communities. 100atl.com $|$ Heat stress: In Atlanta, most of the heat related deaths have occurred from people experiencing homelessness, individuals with dementia who wandered off in the heat, older people who were doing yardwork outside, young children left in hot cars, according to a review of an autopsy report over the past five years. In 2023, the City of Atlanta released a study on which neighborhoods are most vulnerable to heat strokes and even death. https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view. Atlanta's predominantly Black westside neighborhoods are more vulnerable to extremely high temperatures and face higher burdens of climate impacts. https://atlanta.capitalbnews.org/heat-vulnerability-black/. In Metro Atlanta, days over 100 degrees are set to double by 2053. https://www.ajc.com/news/in-metro-atlanta-days-over-100-degrees-to-double-by-2053-report-says/W5REPIFDTFAANBWWMI4WWA4QY4/ \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Bonds$|$Other: penny tax \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 7.5e+08\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 7.5e+08\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0.4}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Transport - Moving Atlanta Forward: 2022 Infrastructure Package: Atlanta voters approved three ballot measures on May 24, 2022, that will make significant investments in the city's infrastructure and economy. The measures — two bonds and the renewal of a special sales tax — will put \$750M toward vital transportation, recreation, public safety and arts projects across the city. The City of Atlanta has identified major infrastructure needs across streets, sidewalks, parks, recreation centers and public safety facilities. To make progress against these needs, the City of Atlanta has prepared a \$750M infrastructure program for the next five years. Of this \$750 million, \$540 will be going to support increase and maintenance of bike and pedestrian infrastructure along with greenspace acquisition and maintenance, trails and transportation, complete streets and bridges. The comprehensive project list can be found at: https://www.atlantaga.gov/government/mayor-s-office/2022infrastructure \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.09e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} City of Atlanta, GA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} United States of America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} North America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 352\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} 51-60\% \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.32e+05 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.08e+13 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.16 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.64 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.8 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.45 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.89e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97.6 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Extreme heat: Around 200 people die in the City of Atlanta annually with heat stroke related issues. Elderly people are at the most risk of heat related deaths and other marginalized communities include children and low-income households that have sub-optimal A/C infrastructure. Atlanta reached a heat record by having 91 days out of the year with temperatures higher than 90 degrees Fahrenheit, with a yearly average of 51 degrees Fahrenheit. The first half of 2022 was the fourth hottest on record. Lower income neighborhoods, often with minimal vegetation and heavy amounts of black asphalt often retain heat and high temperatures. The CoA is currently partnering with Urban Heat ATL, a collaborative partnership between universities like Georgia Tech and Spelman, Community Groups such as West Atlanta Watershed Alliance, Harambeee House, and Partnership for Southern Equity to track urban heat data, and utilize community engagement to support policies and programs to combat urban heat. This program has collected over 1.5 million data points on urban heat communities to find temperature differences in Atlanta's most affected/vulnerable communities. https://urbanheatatl.org/data/https://statesatrisk.org/georgia/extreme-heat This year, with leadership from councilmember Bakhtiari, Georgia Tech developed a Heat and Flood Assessment Report. This study includes heat vulnerability scores by neighborhood, canopy expansion scenarios (street trees, greening percentage, cool roofs), a climate resilience scorecard for downtown, and recommendations for policies to reduce heat and climate related deaths in Atlanta. https://drive.google.com/file/d/1v3lKX-LO4RnG5tTen5HuUIXX4a5uAkZN/view (Presentation)https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view (Data) $|$ Drought: Water scarcity: Droughts can affect the supply of potable water but it also affects the surrounding regions which provide food for the city. In 2008 and 2009, the city had required restrictions on water usage. Low income families lose resources in affordable grocery stores due to lack of access to healthy fruits and vegetables from farms suffering from drought. Also, minorities or low-income people living in older homes can suffer from poor insulation or less than optimal A/C may be in need of more water in hotter water but water-scarcity can put many households in danger of dehydration and other health issues.The city is extremely dependent on surface water. Atlanta receives 70\% of its municipal water from Lake Lanier and part of the Chattahoochee River Basin. There has been experienced debates on water usage and shortages between Georgia, Alabama, and Florida. Fulton county is expected to need over 300 million gallons of water per day by 2035. In years past the City has had only 7 days to 4 weeks of emergency backup water supply, however, the new Westside Quarry Park will add 30 - 60 days of emergency backup water supply. The Department of Watershed Management has a goal in its 2022 Strategic Action Plan to always have at least a 30-day emergency backup water supply. 100atl.comhttps://www.nrdc.org/stories/needing-water-georgia-stirs-200-year-old-dispute-its-northern-neighbor\#:\~{}:text=Atlanta's\%20Fulton\%20County\%20is\%20expected,director\%20of\%20Georgia\%20Conservation\%20Voters. https://www.wabe.org/atlantas-emergency-water-supply-project-at-bellwood-quarry-is-complete/ $|$ Snow and ice: There's been an increase in blizzards and heavy snowstorms. For snowfall, the city has averaged around 2.2 inches in the winter months. The most notable snow storm, labeled $\backslash$'Snowmageddon'' on January 28th, 2014, with 2.6 inches of snow, stranded cars, school children, and impacted all local businesses and Hartsfield Jackson Airport. Atlanta was unprepared with the necessary resources such as salting trucks. An additional snow storm occurred in 2018 disrupting more than 12,800 miles of Georgia highways. This severely affects the city's transportation systems, power access, and the need for warming shelters. The elderly, those living in substandard housing or homeless populations are the most vulnerable. After these snow storms the CoA decided to invest in icing trucks and salt supplies to combat storms more effectively. https://www.accuweather.com/en/winter-weather/atlanta-and-snowfall-a-rocky-history-to-say-the-least/1124310https://www.atlantaga.gov/Home/Components/News/News/14005/672 $|$ Heavy precipitation: Rain storms cause floods in the city overloading the existing sewage system and causing spills in the only source of potable water for the City. Vulnerable populations that are located in low valleys or near poorly constructed roads that have high rates of flooding are especially heavily impacted by increasing occurrences of heavy, sustained rain storms. In 2009 the CoA had \$193 million in damages and 16,900 homes were destroyed due to heavy flooding. As an example, Proctor Creek has flooded multiple times in the past decade leading to home and water damage in historically LMI homes in the westside of Atlanta. The CoA with the Environmental Protection Agency (EPA) and community stakeholders work to replenish the watershed and create sustainable watershed standards. The Proctor Creek Watershed Story Map, a website from this collaboration, has provided resources about sustainable development and policy implications in the watershed. This issue has increased demand for public services and population displacement. This is why the Department of Watershed Management has committed to creating storm-water and green infrastructure projects / funding to help mitigate these impacts during storms across Atlanta, and especially in the Westside of Atlanta.https://www.epa.gov/sciencematters/helping-engage-proctor-creek-community-members-stewards-their-watershedhttps://www.atlantawatershed.org/dwm-projects/ $|$ Extreme cold: Extreme cold temperatures cause pipes to burst in vulnerable populations that have older infrastructure not updated and suited for colder weather. Burst pipes cause additional damages and repair costs alongside inaccessibility to water, flooding, and other essential needs like housing. $|$ Biodiversity loss: The CoA has a major problem with the loss of biodiversity in its trees. The city ranks first in tree biodiversity loss in the U.S., losing 14\% of all native species such as the Eastern White Pine and species such as the Cucumber Magnolia. Biodiversity loss or overall tree canopy loss affects the wildlife and can add to the negative impact of invasive species. Less canopy cover can exaggerate heat risk for elderly and homeless communities. 100atl.com $|$ Heat stress: In Atlanta, most of the heat related deaths have occurred from people experiencing homelessness, individuals with dementia who wandered off in the heat, older people who were doing yardwork outside, young children left in hot cars, according to a review of an autopsy report over the past five years. In 2023, the City of Atlanta released a study on which neighborhoods are most vulnerable to heat strokes and even death. https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view. Atlanta's predominantly Black westside neighborhoods are more vulnerable to extremely high temperatures and face higher burdens of climate impacts. https://atlanta.capitalbnews.org/heat-vulnerability-black/. In Metro Atlanta, days over 100 degrees are set to double by 2053. https://www.ajc.com/news/in-metro-atlanta-days-over-100-degrees-to-double-by-2053-report-says/W5REPIFDTFAANBWWMI4WWA4QY4/ \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Bonds \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.4e+07\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0.4}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Water management - City of Atlanta Department of Watershed Management Environmental Impact Bond for Green Infrastructure: The EIB has provided \$14M to implement green infrastructure and resilience projects on the city's west side, specifically in the Proctor Creek watershed. Redevelopment of disinvested urban areas, such as the Proctor Creek watershed, has the potential to create more impervious surfaces that contribute to stormwater runoff, water quality issues, and flooding during rainfall events. The Proctor Creek watershed neighborhoods are surrounded by acres of impervious areas and nestled in the predominantly African American, low-income communities of Vine City, English Avenue, and Historic Westin Heights-Bankhead. In order to build capacity in these marginalized communities, DWM is developing a hyper-local workforce strategy that provides training and employment to the people who live in and around the neighborhoods where these projects will be constructed. https://www.atlantawatershed.org/first-publicly-issued-environmental-impact-bond/ \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.09e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} City of Atlanta, GA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} United States of America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} North America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 352\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} 51-60\% \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.32e+05 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.08e+13 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.16 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.64 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.8 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.45 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.89e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97.6 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Extreme heat: Around 200 people die in the City of Atlanta annually with heat stroke related issues. Elderly people are at the most risk of heat related deaths and other marginalized communities include children and low-income households that have sub-optimal A/C infrastructure. Atlanta reached a heat record by having 91 days out of the year with temperatures higher than 90 degrees Fahrenheit, with a yearly average of 51 degrees Fahrenheit. The first half of 2022 was the fourth hottest on record. Lower income neighborhoods, often with minimal vegetation and heavy amounts of black asphalt often retain heat and high temperatures. The CoA is currently partnering with Urban Heat ATL, a collaborative partnership between universities like Georgia Tech and Spelman, Community Groups such as West Atlanta Watershed Alliance, Harambeee House, and Partnership for Southern Equity to track urban heat data, and utilize community engagement to support policies and programs to combat urban heat. This program has collected over 1.5 million data points on urban heat communities to find temperature differences in Atlanta's most affected/vulnerable communities. https://urbanheatatl.org/data/https://statesatrisk.org/georgia/extreme-heat This year, with leadership from councilmember Bakhtiari, Georgia Tech developed a Heat and Flood Assessment Report. This study includes heat vulnerability scores by neighborhood, canopy expansion scenarios (street trees, greening percentage, cool roofs), a climate resilience scorecard for downtown, and recommendations for policies to reduce heat and climate related deaths in Atlanta. https://drive.google.com/file/d/1v3lKX-LO4RnG5tTen5HuUIXX4a5uAkZN/view (Presentation)https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view (Data) $|$ Drought: Water scarcity: Droughts can affect the supply of potable water but it also affects the surrounding regions which provide food for the city. In 2008 and 2009, the city had required restrictions on water usage. Low income families lose resources in affordable grocery stores due to lack of access to healthy fruits and vegetables from farms suffering from drought. Also, minorities or low-income people living in older homes can suffer from poor insulation or less than optimal A/C may be in need of more water in hotter water but water-scarcity can put many households in danger of dehydration and other health issues.The city is extremely dependent on surface water. Atlanta receives 70\% of its municipal water from Lake Lanier and part of the Chattahoochee River Basin. There has been experienced debates on water usage and shortages between Georgia, Alabama, and Florida. Fulton county is expected to need over 300 million gallons of water per day by 2035. In years past the City has had only 7 days to 4 weeks of emergency backup water supply, however, the new Westside Quarry Park will add 30 - 60 days of emergency backup water supply. The Department of Watershed Management has a goal in its 2022 Strategic Action Plan to always have at least a 30-day emergency backup water supply. 100atl.comhttps://www.nrdc.org/stories/needing-water-georgia-stirs-200-year-old-dispute-its-northern-neighbor\#:\~{}:text=Atlanta's\%20Fulton\%20County\%20is\%20expected,director\%20of\%20Georgia\%20Conservation\%20Voters. https://www.wabe.org/atlantas-emergency-water-supply-project-at-bellwood-quarry-is-complete/ $|$ Snow and ice: There's been an increase in blizzards and heavy snowstorms. For snowfall, the city has averaged around 2.2 inches in the winter months. The most notable snow storm, labeled $\backslash$'Snowmageddon'' on January 28th, 2014, with 2.6 inches of snow, stranded cars, school children, and impacted all local businesses and Hartsfield Jackson Airport. Atlanta was unprepared with the necessary resources such as salting trucks. An additional snow storm occurred in 2018 disrupting more than 12,800 miles of Georgia highways. This severely affects the city's transportation systems, power access, and the need for warming shelters. The elderly, those living in substandard housing or homeless populations are the most vulnerable. After these snow storms the CoA decided to invest in icing trucks and salt supplies to combat storms more effectively. https://www.accuweather.com/en/winter-weather/atlanta-and-snowfall-a-rocky-history-to-say-the-least/1124310https://www.atlantaga.gov/Home/Components/News/News/14005/672 $|$ Heavy precipitation: Rain storms cause floods in the city overloading the existing sewage system and causing spills in the only source of potable water for the City. Vulnerable populations that are located in low valleys or near poorly constructed roads that have high rates of flooding are especially heavily impacted by increasing occurrences of heavy, sustained rain storms. In 2009 the CoA had \$193 million in damages and 16,900 homes were destroyed due to heavy flooding. As an example, Proctor Creek has flooded multiple times in the past decade leading to home and water damage in historically LMI homes in the westside of Atlanta. The CoA with the Environmental Protection Agency (EPA) and community stakeholders work to replenish the watershed and create sustainable watershed standards. The Proctor Creek Watershed Story Map, a website from this collaboration, has provided resources about sustainable development and policy implications in the watershed. This issue has increased demand for public services and population displacement. This is why the Department of Watershed Management has committed to creating storm-water and green infrastructure projects / funding to help mitigate these impacts during storms across Atlanta, and especially in the Westside of Atlanta.https://www.epa.gov/sciencematters/helping-engage-proctor-creek-community-members-stewards-their-watershedhttps://www.atlantawatershed.org/dwm-projects/ $|$ Extreme cold: Extreme cold temperatures cause pipes to burst in vulnerable populations that have older infrastructure not updated and suited for colder weather. Burst pipes cause additional damages and repair costs alongside inaccessibility to water, flooding, and other essential needs like housing. $|$ Biodiversity loss: The CoA has a major problem with the loss of biodiversity in its trees. The city ranks first in tree biodiversity loss in the U.S., losing 14\% of all native species such as the Eastern White Pine and species such as the Cucumber Magnolia. Biodiversity loss or overall tree canopy loss affects the wildlife and can add to the negative impact of invasive species. Less canopy cover can exaggerate heat risk for elderly and homeless communities. 100atl.com $|$ Heat stress: In Atlanta, most of the heat related deaths have occurred from people experiencing homelessness, individuals with dementia who wandered off in the heat, older people who were doing yardwork outside, young children left in hot cars, according to a review of an autopsy report over the past five years. In 2023, the City of Atlanta released a study on which neighborhoods are most vulnerable to heat strokes and even death. https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view. Atlanta's predominantly Black westside neighborhoods are more vulnerable to extremely high temperatures and face higher burdens of climate impacts. https://atlanta.capitalbnews.org/heat-vulnerability-black/. In Metro Atlanta, days over 100 degrees are set to double by 2053. https://www.ajc.com/news/in-metro-atlanta-days-over-100-degrees-to-double-by-2053-report-says/W5REPIFDTFAANBWWMI4WWA4QY4/ \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Public-private partnership$|$Grants \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.38e+05 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5e+06\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0.4}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Energy efficiency (including public lighting) - Energy Efficiency Retrofits: The City is seeking additional funding for municipal energy efficiency projects, funding has been supplied for a couple buildings to conduct an energy audit and implement measures to improve energy efficiency. The funding had been supplied through DOE's Energy Efficiency Conservation Block Grant (EECBG) and funding provided from Georgia Power to upgrade Fire Station 21, the fire department was very excited about the project and was seeking to expand, but the City does not have an identified source for continual funding. \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.09e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} City of Atlanta, GA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} United States of America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} North America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 352\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} 51-60\% \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.32e+05 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.08e+13 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.16 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.64 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.8 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.45 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.89e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97.6 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Extreme heat: Around 200 people die in the City of Atlanta annually with heat stroke related issues. Elderly people are at the most risk of heat related deaths and other marginalized communities include children and low-income households that have sub-optimal A/C infrastructure. Atlanta reached a heat record by having 91 days out of the year with temperatures higher than 90 degrees Fahrenheit, with a yearly average of 51 degrees Fahrenheit. The first half of 2022 was the fourth hottest on record. Lower income neighborhoods, often with minimal vegetation and heavy amounts of black asphalt often retain heat and high temperatures. The CoA is currently partnering with Urban Heat ATL, a collaborative partnership between universities like Georgia Tech and Spelman, Community Groups such as West Atlanta Watershed Alliance, Harambeee House, and Partnership for Southern Equity to track urban heat data, and utilize community engagement to support policies and programs to combat urban heat. This program has collected over 1.5 million data points on urban heat communities to find temperature differences in Atlanta's most affected/vulnerable communities. https://urbanheatatl.org/data/https://statesatrisk.org/georgia/extreme-heat This year, with leadership from councilmember Bakhtiari, Georgia Tech developed a Heat and Flood Assessment Report. This study includes heat vulnerability scores by neighborhood, canopy expansion scenarios (street trees, greening percentage, cool roofs), a climate resilience scorecard for downtown, and recommendations for policies to reduce heat and climate related deaths in Atlanta. https://drive.google.com/file/d/1v3lKX-LO4RnG5tTen5HuUIXX4a5uAkZN/view (Presentation)https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view (Data) $|$ Drought: Water scarcity: Droughts can affect the supply of potable water but it also affects the surrounding regions which provide food for the city. In 2008 and 2009, the city had required restrictions on water usage. Low income families lose resources in affordable grocery stores due to lack of access to healthy fruits and vegetables from farms suffering from drought. Also, minorities or low-income people living in older homes can suffer from poor insulation or less than optimal A/C may be in need of more water in hotter water but water-scarcity can put many households in danger of dehydration and other health issues.The city is extremely dependent on surface water. Atlanta receives 70\% of its municipal water from Lake Lanier and part of the Chattahoochee River Basin. There has been experienced debates on water usage and shortages between Georgia, Alabama, and Florida. Fulton county is expected to need over 300 million gallons of water per day by 2035. In years past the City has had only 7 days to 4 weeks of emergency backup water supply, however, the new Westside Quarry Park will add 30 - 60 days of emergency backup water supply. The Department of Watershed Management has a goal in its 2022 Strategic Action Plan to always have at least a 30-day emergency backup water supply. 100atl.comhttps://www.nrdc.org/stories/needing-water-georgia-stirs-200-year-old-dispute-its-northern-neighbor\#:\~{}:text=Atlanta's\%20Fulton\%20County\%20is\%20expected,director\%20of\%20Georgia\%20Conservation\%20Voters. https://www.wabe.org/atlantas-emergency-water-supply-project-at-bellwood-quarry-is-complete/ $|$ Snow and ice: There's been an increase in blizzards and heavy snowstorms. For snowfall, the city has averaged around 2.2 inches in the winter months. The most notable snow storm, labeled $\backslash$'Snowmageddon'' on January 28th, 2014, with 2.6 inches of snow, stranded cars, school children, and impacted all local businesses and Hartsfield Jackson Airport. Atlanta was unprepared with the necessary resources such as salting trucks. An additional snow storm occurred in 2018 disrupting more than 12,800 miles of Georgia highways. This severely affects the city's transportation systems, power access, and the need for warming shelters. The elderly, those living in substandard housing or homeless populations are the most vulnerable. After these snow storms the CoA decided to invest in icing trucks and salt supplies to combat storms more effectively. https://www.accuweather.com/en/winter-weather/atlanta-and-snowfall-a-rocky-history-to-say-the-least/1124310https://www.atlantaga.gov/Home/Components/News/News/14005/672 $|$ Heavy precipitation: Rain storms cause floods in the city overloading the existing sewage system and causing spills in the only source of potable water for the City. Vulnerable populations that are located in low valleys or near poorly constructed roads that have high rates of flooding are especially heavily impacted by increasing occurrences of heavy, sustained rain storms. In 2009 the CoA had \$193 million in damages and 16,900 homes were destroyed due to heavy flooding. As an example, Proctor Creek has flooded multiple times in the past decade leading to home and water damage in historically LMI homes in the westside of Atlanta. The CoA with the Environmental Protection Agency (EPA) and community stakeholders work to replenish the watershed and create sustainable watershed standards. The Proctor Creek Watershed Story Map, a website from this collaboration, has provided resources about sustainable development and policy implications in the watershed. This issue has increased demand for public services and population displacement. This is why the Department of Watershed Management has committed to creating storm-water and green infrastructure projects / funding to help mitigate these impacts during storms across Atlanta, and especially in the Westside of Atlanta.https://www.epa.gov/sciencematters/helping-engage-proctor-creek-community-members-stewards-their-watershedhttps://www.atlantawatershed.org/dwm-projects/ $|$ Extreme cold: Extreme cold temperatures cause pipes to burst in vulnerable populations that have older infrastructure not updated and suited for colder weather. Burst pipes cause additional damages and repair costs alongside inaccessibility to water, flooding, and other essential needs like housing. $|$ Biodiversity loss: The CoA has a major problem with the loss of biodiversity in its trees. The city ranks first in tree biodiversity loss in the U.S., losing 14\% of all native species such as the Eastern White Pine and species such as the Cucumber Magnolia. Biodiversity loss or overall tree canopy loss affects the wildlife and can add to the negative impact of invasive species. Less canopy cover can exaggerate heat risk for elderly and homeless communities. 100atl.com $|$ Heat stress: In Atlanta, most of the heat related deaths have occurred from people experiencing homelessness, individuals with dementia who wandered off in the heat, older people who were doing yardwork outside, young children left in hot cars, according to a review of an autopsy report over the past five years. In 2023, the City of Atlanta released a study on which neighborhoods are most vulnerable to heat strokes and even death. https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view. Atlanta's predominantly Black westside neighborhoods are more vulnerable to extremely high temperatures and face higher burdens of climate impacts. https://atlanta.capitalbnews.org/heat-vulnerability-black/. In Metro Atlanta, days over 100 degrees are set to double by 2053. https://www.ajc.com/news/in-metro-atlanta-days-over-100-degrees-to-double-by-2053-report-says/W5REPIFDTFAANBWWMI4WWA4QY4/ \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Public finance- own budget$|$Grants \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 8.57e+06 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0.4}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Renewable energy - BESS Emergency Backup: A goal for the Office of Sustainability \& Resilience is to deploy resilience hubs by transitioning municipal facilities from fossil gas to PV \& battery storage backup. Funding is currently being applied to through state Hazard Mitigation funding from FEMA. Currently, there is one resilience hub in Atlanta at a church that serves the community, Vicars Community Church of God, but not yet for a municipal facility. If awarded, the FEMA funding will go towards critical facilities in the City of Atlanta that need to continue operations in the case of an outage, such as warming and cooling centers. Additional funding is needed for facilities to transition to 100\% clean energy and include a battery storage need. \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.09e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} City of Atlanta, GA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} United States of America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} North America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 352\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} 51-60\% \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.32e+05 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.08e+13 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.16 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.64 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.8 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.45 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.89e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97.6 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Extreme heat: Around 200 people die in the City of Atlanta annually with heat stroke related issues. Elderly people are at the most risk of heat related deaths and other marginalized communities include children and low-income households that have sub-optimal A/C infrastructure. Atlanta reached a heat record by having 91 days out of the year with temperatures higher than 90 degrees Fahrenheit, with a yearly average of 51 degrees Fahrenheit. The first half of 2022 was the fourth hottest on record. Lower income neighborhoods, often with minimal vegetation and heavy amounts of black asphalt often retain heat and high temperatures. The CoA is currently partnering with Urban Heat ATL, a collaborative partnership between universities like Georgia Tech and Spelman, Community Groups such as West Atlanta Watershed Alliance, Harambeee House, and Partnership for Southern Equity to track urban heat data, and utilize community engagement to support policies and programs to combat urban heat. This program has collected over 1.5 million data points on urban heat communities to find temperature differences in Atlanta's most affected/vulnerable communities. https://urbanheatatl.org/data/https://statesatrisk.org/georgia/extreme-heat This year, with leadership from councilmember Bakhtiari, Georgia Tech developed a Heat and Flood Assessment Report. This study includes heat vulnerability scores by neighborhood, canopy expansion scenarios (street trees, greening percentage, cool roofs), a climate resilience scorecard for downtown, and recommendations for policies to reduce heat and climate related deaths in Atlanta. https://drive.google.com/file/d/1v3lKX-LO4RnG5tTen5HuUIXX4a5uAkZN/view (Presentation)https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view (Data) $|$ Drought: Water scarcity: Droughts can affect the supply of potable water but it also affects the surrounding regions which provide food for the city. In 2008 and 2009, the city had required restrictions on water usage. Low income families lose resources in affordable grocery stores due to lack of access to healthy fruits and vegetables from farms suffering from drought. Also, minorities or low-income people living in older homes can suffer from poor insulation or less than optimal A/C may be in need of more water in hotter water but water-scarcity can put many households in danger of dehydration and other health issues.The city is extremely dependent on surface water. Atlanta receives 70\% of its municipal water from Lake Lanier and part of the Chattahoochee River Basin. There has been experienced debates on water usage and shortages between Georgia, Alabama, and Florida. Fulton county is expected to need over 300 million gallons of water per day by 2035. In years past the City has had only 7 days to 4 weeks of emergency backup water supply, however, the new Westside Quarry Park will add 30 - 60 days of emergency backup water supply. The Department of Watershed Management has a goal in its 2022 Strategic Action Plan to always have at least a 30-day emergency backup water supply. 100atl.comhttps://www.nrdc.org/stories/needing-water-georgia-stirs-200-year-old-dispute-its-northern-neighbor\#:\~{}:text=Atlanta's\%20Fulton\%20County\%20is\%20expected,director\%20of\%20Georgia\%20Conservation\%20Voters. https://www.wabe.org/atlantas-emergency-water-supply-project-at-bellwood-quarry-is-complete/ $|$ Snow and ice: There's been an increase in blizzards and heavy snowstorms. For snowfall, the city has averaged around 2.2 inches in the winter months. The most notable snow storm, labeled $\backslash$'Snowmageddon'' on January 28th, 2014, with 2.6 inches of snow, stranded cars, school children, and impacted all local businesses and Hartsfield Jackson Airport. Atlanta was unprepared with the necessary resources such as salting trucks. An additional snow storm occurred in 2018 disrupting more than 12,800 miles of Georgia highways. This severely affects the city's transportation systems, power access, and the need for warming shelters. The elderly, those living in substandard housing or homeless populations are the most vulnerable. After these snow storms the CoA decided to invest in icing trucks and salt supplies to combat storms more effectively. https://www.accuweather.com/en/winter-weather/atlanta-and-snowfall-a-rocky-history-to-say-the-least/1124310https://www.atlantaga.gov/Home/Components/News/News/14005/672 $|$ Heavy precipitation: Rain storms cause floods in the city overloading the existing sewage system and causing spills in the only source of potable water for the City. Vulnerable populations that are located in low valleys or near poorly constructed roads that have high rates of flooding are especially heavily impacted by increasing occurrences of heavy, sustained rain storms. In 2009 the CoA had \$193 million in damages and 16,900 homes were destroyed due to heavy flooding. As an example, Proctor Creek has flooded multiple times in the past decade leading to home and water damage in historically LMI homes in the westside of Atlanta. The CoA with the Environmental Protection Agency (EPA) and community stakeholders work to replenish the watershed and create sustainable watershed standards. The Proctor Creek Watershed Story Map, a website from this collaboration, has provided resources about sustainable development and policy implications in the watershed. This issue has increased demand for public services and population displacement. This is why the Department of Watershed Management has committed to creating storm-water and green infrastructure projects / funding to help mitigate these impacts during storms across Atlanta, and especially in the Westside of Atlanta.https://www.epa.gov/sciencematters/helping-engage-proctor-creek-community-members-stewards-their-watershedhttps://www.atlantawatershed.org/dwm-projects/ $|$ Extreme cold: Extreme cold temperatures cause pipes to burst in vulnerable populations that have older infrastructure not updated and suited for colder weather. Burst pipes cause additional damages and repair costs alongside inaccessibility to water, flooding, and other essential needs like housing. $|$ Biodiversity loss: The CoA has a major problem with the loss of biodiversity in its trees. The city ranks first in tree biodiversity loss in the U.S., losing 14\% of all native species such as the Eastern White Pine and species such as the Cucumber Magnolia. Biodiversity loss or overall tree canopy loss affects the wildlife and can add to the negative impact of invasive species. Less canopy cover can exaggerate heat risk for elderly and homeless communities. 100atl.com $|$ Heat stress: In Atlanta, most of the heat related deaths have occurred from people experiencing homelessness, individuals with dementia who wandered off in the heat, older people who were doing yardwork outside, young children left in hot cars, according to a review of an autopsy report over the past five years. In 2023, the City of Atlanta released a study on which neighborhoods are most vulnerable to heat strokes and even death. https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view. Atlanta's predominantly Black westside neighborhoods are more vulnerable to extremely high temperatures and face higher burdens of climate impacts. https://atlanta.capitalbnews.org/heat-vulnerability-black/. In Metro Atlanta, days over 100 degrees are set to double by 2053. https://www.ajc.com/news/in-metro-atlanta-days-over-100-degrees-to-double-by-2053-report-says/W5REPIFDTFAANBWWMI4WWA4QY4/ \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Public-private partnership$|$Public finance- own budget \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 6.7e+06\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.68e+06 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0.4}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Renewable energy - Solar Atlanta: Solar Atlanta is the City's municipal solar power program on City-owned sites. Currently, looking to expand this across Atlanta's portfolio to reach 100\% clean energy by 2035, specifically seeking funding for a capped landfill solar community energy project. This would be an alternative model to our Solar Energy Procurement Agreement (SEPA) and would include upfront capital needed to launch. The cost of the project would be \$2.68M with Direct Pay incentives, without them the cost would drive up to \$6.7M. \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.09e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} City of Atlanta, GA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} United States of America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} North America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 352\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} 51-60\% \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.32e+05 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.08e+13 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.16 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.64 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.8 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.45 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.89e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97.6 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Extreme heat: Around 200 people die in the City of Atlanta annually with heat stroke related issues. Elderly people are at the most risk of heat related deaths and other marginalized communities include children and low-income households that have sub-optimal A/C infrastructure. Atlanta reached a heat record by having 91 days out of the year with temperatures higher than 90 degrees Fahrenheit, with a yearly average of 51 degrees Fahrenheit. The first half of 2022 was the fourth hottest on record. Lower income neighborhoods, often with minimal vegetation and heavy amounts of black asphalt often retain heat and high temperatures. The CoA is currently partnering with Urban Heat ATL, a collaborative partnership between universities like Georgia Tech and Spelman, Community Groups such as West Atlanta Watershed Alliance, Harambeee House, and Partnership for Southern Equity to track urban heat data, and utilize community engagement to support policies and programs to combat urban heat. This program has collected over 1.5 million data points on urban heat communities to find temperature differences in Atlanta's most affected/vulnerable communities. https://urbanheatatl.org/data/https://statesatrisk.org/georgia/extreme-heat This year, with leadership from councilmember Bakhtiari, Georgia Tech developed a Heat and Flood Assessment Report. This study includes heat vulnerability scores by neighborhood, canopy expansion scenarios (street trees, greening percentage, cool roofs), a climate resilience scorecard for downtown, and recommendations for policies to reduce heat and climate related deaths in Atlanta. https://drive.google.com/file/d/1v3lKX-LO4RnG5tTen5HuUIXX4a5uAkZN/view (Presentation)https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view (Data) $|$ Drought: Water scarcity: Droughts can affect the supply of potable water but it also affects the surrounding regions which provide food for the city. In 2008 and 2009, the city had required restrictions on water usage. Low income families lose resources in affordable grocery stores due to lack of access to healthy fruits and vegetables from farms suffering from drought. Also, minorities or low-income people living in older homes can suffer from poor insulation or less than optimal A/C may be in need of more water in hotter water but water-scarcity can put many households in danger of dehydration and other health issues.The city is extremely dependent on surface water. Atlanta receives 70\% of its municipal water from Lake Lanier and part of the Chattahoochee River Basin. There has been experienced debates on water usage and shortages between Georgia, Alabama, and Florida. Fulton county is expected to need over 300 million gallons of water per day by 2035. In years past the City has had only 7 days to 4 weeks of emergency backup water supply, however, the new Westside Quarry Park will add 30 - 60 days of emergency backup water supply. The Department of Watershed Management has a goal in its 2022 Strategic Action Plan to always have at least a 30-day emergency backup water supply. 100atl.comhttps://www.nrdc.org/stories/needing-water-georgia-stirs-200-year-old-dispute-its-northern-neighbor\#:\~{}:text=Atlanta's\%20Fulton\%20County\%20is\%20expected,director\%20of\%20Georgia\%20Conservation\%20Voters. https://www.wabe.org/atlantas-emergency-water-supply-project-at-bellwood-quarry-is-complete/ $|$ Snow and ice: There's been an increase in blizzards and heavy snowstorms. For snowfall, the city has averaged around 2.2 inches in the winter months. The most notable snow storm, labeled $\backslash$'Snowmageddon'' on January 28th, 2014, with 2.6 inches of snow, stranded cars, school children, and impacted all local businesses and Hartsfield Jackson Airport. Atlanta was unprepared with the necessary resources such as salting trucks. An additional snow storm occurred in 2018 disrupting more than 12,800 miles of Georgia highways. This severely affects the city's transportation systems, power access, and the need for warming shelters. The elderly, those living in substandard housing or homeless populations are the most vulnerable. After these snow storms the CoA decided to invest in icing trucks and salt supplies to combat storms more effectively. https://www.accuweather.com/en/winter-weather/atlanta-and-snowfall-a-rocky-history-to-say-the-least/1124310https://www.atlantaga.gov/Home/Components/News/News/14005/672 $|$ Heavy precipitation: Rain storms cause floods in the city overloading the existing sewage system and causing spills in the only source of potable water for the City. Vulnerable populations that are located in low valleys or near poorly constructed roads that have high rates of flooding are especially heavily impacted by increasing occurrences of heavy, sustained rain storms. In 2009 the CoA had \$193 million in damages and 16,900 homes were destroyed due to heavy flooding. As an example, Proctor Creek has flooded multiple times in the past decade leading to home and water damage in historically LMI homes in the westside of Atlanta. The CoA with the Environmental Protection Agency (EPA) and community stakeholders work to replenish the watershed and create sustainable watershed standards. The Proctor Creek Watershed Story Map, a website from this collaboration, has provided resources about sustainable development and policy implications in the watershed. This issue has increased demand for public services and population displacement. This is why the Department of Watershed Management has committed to creating storm-water and green infrastructure projects / funding to help mitigate these impacts during storms across Atlanta, and especially in the Westside of Atlanta.https://www.epa.gov/sciencematters/helping-engage-proctor-creek-community-members-stewards-their-watershedhttps://www.atlantawatershed.org/dwm-projects/ $|$ Extreme cold: Extreme cold temperatures cause pipes to burst in vulnerable populations that have older infrastructure not updated and suited for colder weather. Burst pipes cause additional damages and repair costs alongside inaccessibility to water, flooding, and other essential needs like housing. $|$ Biodiversity loss: The CoA has a major problem with the loss of biodiversity in its trees. The city ranks first in tree biodiversity loss in the U.S., losing 14\% of all native species such as the Eastern White Pine and species such as the Cucumber Magnolia. Biodiversity loss or overall tree canopy loss affects the wildlife and can add to the negative impact of invasive species. Less canopy cover can exaggerate heat risk for elderly and homeless communities. 100atl.com $|$ Heat stress: In Atlanta, most of the heat related deaths have occurred from people experiencing homelessness, individuals with dementia who wandered off in the heat, older people who were doing yardwork outside, young children left in hot cars, according to a review of an autopsy report over the past five years. In 2023, the City of Atlanta released a study on which neighborhoods are most vulnerable to heat strokes and even death. https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view. Atlanta's predominantly Black westside neighborhoods are more vulnerable to extremely high temperatures and face higher burdens of climate impacts. https://atlanta.capitalbnews.org/heat-vulnerability-black/. In Metro Atlanta, days over 100 degrees are set to double by 2053. https://www.ajc.com/news/in-metro-atlanta-days-over-100-degrees-to-double-by-2053-report-says/W5REPIFDTFAANBWWMI4WWA4QY4/ \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Public-private partnership$|$Public finance- own budget$|$Grants \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.5e+07\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0.4}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Transport - Electric Vehicles and Electric Vehicle Charging Stations: As the City works to transition its fleet to zero emission and low emission vehicles, especially EV's, and lead, partner and support the installation of 250 new EV charging ports through 2025 as well as aligning with Climate Mayor's 500\% increase in EV charging by 2030. $\backslash$n$\backslash$nAtlanta Fire Foundation's fleet forward campaign has purchased the first two EV emergency response vehicles (Rivian R1T's) for our Atlanta Fire Rescue Department's Fleet but is still raising in its \$3 million capital goal to purchase the City first EV Fire Truck (Rosenbauer) $\backslash$n$\backslash$nCFI Grant: \$11.8M (USDOT/FHWA CFI, announced Aug 27, 2024). Scope is a 50-port DC fast-charging hub at Hartsfield-Jackson Atlanta International Airport to serve rental fleets, rideshare, hotel shuttles, airport employees, City fleet (light-heavy duty), and the traveling public on adjacent interstates. Status: In early 2025, federal EV-charging funds were paused/frozen. Atlanta's CFI award remains treated as “frozen” pending clear federal direction on Georgia resumption, so the City is maintaining project readiness while the pause is resolved.$\backslash$n$\backslash$n3rd Party owned charging on City owned property model: A cost-neutral (potentially revenue-generating) partnership in which a private EV charging provider owns, finances, installs, operates, and maintains DCFC and L2 chargers on City sites and eligible right-of-way; the City grants site access/licenses and receives revenue share or site-host fees. This approach is consistent with established right-of-way licensing and public-private EVSE best practices used by peer cities. This is currently in the process of the City's procurement Department to move forward. $\backslash$n$\backslash$nCHDV Grant: The City of Atlanta was awarded \$3.2 million through the EPA's Clean Heavy-Duty Vehicles (CHDV) program to accelerate the electrification of its municipal fleet. Under this grant, the City will deploy seven medium- and heavy-duty zero-emission vehicles (including refuse and utility trucks, a street sweeper, and transit-style shuttles) and seven 150-kW DC fast chargers across four priority municipal sites. An earlier proposal to electrify four Department of Aviation buses was deemed ineligible, reducing the total scope to seven vehicles and seven chargers. The project, known as EcoFleet ATL, will deliver measurable reductions in greenhouse gas and criteria pollutant emissions, improve air quality in overburdened neighborhoods, and build workforce capacity through mechanic and operator EV training. It also represents the City's first dedicated heavy-duty EV and DC fast charging deployments, serving as a foundation for scaling electrification across Atlanta's municipal fleet. However, rising tariff prices on both EVs and charging infrastructure have significantly increased project costs, making external funding (like Georgia Power's Make Ready Program) important to closing budget gaps and maximizing successful implementation. $\backslash$n$\backslash$n \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.09e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} City of Atlanta, GA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} United States of America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} North America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 352\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} 51-60\% \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.32e+05 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.08e+13 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.16 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.64 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.8 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.45 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.89e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97.6 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Extreme heat: Around 200 people die in the City of Atlanta annually with heat stroke related issues. Elderly people are at the most risk of heat related deaths and other marginalized communities include children and low-income households that have sub-optimal A/C infrastructure. Atlanta reached a heat record by having 91 days out of the year with temperatures higher than 90 degrees Fahrenheit, with a yearly average of 51 degrees Fahrenheit. The first half of 2022 was the fourth hottest on record. Lower income neighborhoods, often with minimal vegetation and heavy amounts of black asphalt often retain heat and high temperatures. The CoA is currently partnering with Urban Heat ATL, a collaborative partnership between universities like Georgia Tech and Spelman, Community Groups such as West Atlanta Watershed Alliance, Harambeee House, and Partnership for Southern Equity to track urban heat data, and utilize community engagement to support policies and programs to combat urban heat. This program has collected over 1.5 million data points on urban heat communities to find temperature differences in Atlanta's most affected/vulnerable communities. https://urbanheatatl.org/data/https://statesatrisk.org/georgia/extreme-heat This year, with leadership from councilmember Bakhtiari, Georgia Tech developed a Heat and Flood Assessment Report. This study includes heat vulnerability scores by neighborhood, canopy expansion scenarios (street trees, greening percentage, cool roofs), a climate resilience scorecard for downtown, and recommendations for policies to reduce heat and climate related deaths in Atlanta. https://drive.google.com/file/d/1v3lKX-LO4RnG5tTen5HuUIXX4a5uAkZN/view (Presentation)https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view (Data) $|$ Drought: Water scarcity: Droughts can affect the supply of potable water but it also affects the surrounding regions which provide food for the city. In 2008 and 2009, the city had required restrictions on water usage. Low income families lose resources in affordable grocery stores due to lack of access to healthy fruits and vegetables from farms suffering from drought. Also, minorities or low-income people living in older homes can suffer from poor insulation or less than optimal A/C may be in need of more water in hotter water but water-scarcity can put many households in danger of dehydration and other health issues.The city is extremely dependent on surface water. Atlanta receives 70\% of its municipal water from Lake Lanier and part of the Chattahoochee River Basin. There has been experienced debates on water usage and shortages between Georgia, Alabama, and Florida. Fulton county is expected to need over 300 million gallons of water per day by 2035. In years past the City has had only 7 days to 4 weeks of emergency backup water supply, however, the new Westside Quarry Park will add 30 - 60 days of emergency backup water supply. The Department of Watershed Management has a goal in its 2022 Strategic Action Plan to always have at least a 30-day emergency backup water supply. 100atl.comhttps://www.nrdc.org/stories/needing-water-georgia-stirs-200-year-old-dispute-its-northern-neighbor\#:\~{}:text=Atlanta's\%20Fulton\%20County\%20is\%20expected,director\%20of\%20Georgia\%20Conservation\%20Voters. https://www.wabe.org/atlantas-emergency-water-supply-project-at-bellwood-quarry-is-complete/ $|$ Snow and ice: There's been an increase in blizzards and heavy snowstorms. For snowfall, the city has averaged around 2.2 inches in the winter months. The most notable snow storm, labeled $\backslash$'Snowmageddon'' on January 28th, 2014, with 2.6 inches of snow, stranded cars, school children, and impacted all local businesses and Hartsfield Jackson Airport. Atlanta was unprepared with the necessary resources such as salting trucks. An additional snow storm occurred in 2018 disrupting more than 12,800 miles of Georgia highways. This severely affects the city's transportation systems, power access, and the need for warming shelters. The elderly, those living in substandard housing or homeless populations are the most vulnerable. After these snow storms the CoA decided to invest in icing trucks and salt supplies to combat storms more effectively. https://www.accuweather.com/en/winter-weather/atlanta-and-snowfall-a-rocky-history-to-say-the-least/1124310https://www.atlantaga.gov/Home/Components/News/News/14005/672 $|$ Heavy precipitation: Rain storms cause floods in the city overloading the existing sewage system and causing spills in the only source of potable water for the City. Vulnerable populations that are located in low valleys or near poorly constructed roads that have high rates of flooding are especially heavily impacted by increasing occurrences of heavy, sustained rain storms. In 2009 the CoA had \$193 million in damages and 16,900 homes were destroyed due to heavy flooding. As an example, Proctor Creek has flooded multiple times in the past decade leading to home and water damage in historically LMI homes in the westside of Atlanta. The CoA with the Environmental Protection Agency (EPA) and community stakeholders work to replenish the watershed and create sustainable watershed standards. The Proctor Creek Watershed Story Map, a website from this collaboration, has provided resources about sustainable development and policy implications in the watershed. This issue has increased demand for public services and population displacement. This is why the Department of Watershed Management has committed to creating storm-water and green infrastructure projects / funding to help mitigate these impacts during storms across Atlanta, and especially in the Westside of Atlanta.https://www.epa.gov/sciencematters/helping-engage-proctor-creek-community-members-stewards-their-watershedhttps://www.atlantawatershed.org/dwm-projects/ $|$ Extreme cold: Extreme cold temperatures cause pipes to burst in vulnerable populations that have older infrastructure not updated and suited for colder weather. Burst pipes cause additional damages and repair costs alongside inaccessibility to water, flooding, and other essential needs like housing. $|$ Biodiversity loss: The CoA has a major problem with the loss of biodiversity in its trees. The city ranks first in tree biodiversity loss in the U.S., losing 14\% of all native species such as the Eastern White Pine and species such as the Cucumber Magnolia. Biodiversity loss or overall tree canopy loss affects the wildlife and can add to the negative impact of invasive species. Less canopy cover can exaggerate heat risk for elderly and homeless communities. 100atl.com $|$ Heat stress: In Atlanta, most of the heat related deaths have occurred from people experiencing homelessness, individuals with dementia who wandered off in the heat, older people who were doing yardwork outside, young children left in hot cars, according to a review of an autopsy report over the past five years. In 2023, the City of Atlanta released a study on which neighborhoods are most vulnerable to heat strokes and even death. https://drive.google.com/file/d/1XRTlCfyP1j2wyhvov3b\_RCn5pULhDN2\_/view. Atlanta's predominantly Black westside neighborhoods are more vulnerable to extremely high temperatures and face higher burdens of climate impacts. https://atlanta.capitalbnews.org/heat-vulnerability-black/. In Metro Atlanta, days over 100 degrees are set to double by 2053. https://www.ajc.com/news/in-metro-atlanta-days-over-100-degrees-to-double-by-2053-report-says/W5REPIFDTFAANBWWMI4WWA4QY4/ \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Loans from commercial banks$|$Private investment$|$Grants$|$Loans from International Financial Institutions$|$Public finance- own budget$|$Public-private partnership$|$Bonds \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.52e+08 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0.4}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Transport - Trails ATL: The City of Atlanta formally adopted the Trails ATL master plan on June 16, 2025, through unanimous City Council approval, integrating it into the City's Comprehensive Development Plan and establishing the policy framework needed to move into implementation. As part of this bold 30 year vision, the plan targets a total network of 535 miles of multi use trails designed to connect neighborhoods, parks, schools, transit corridors, and greenways, ultimately enabling 95 percent of residents to access an $\backslash$'all ages, all abilities$\backslash$' trail within a 10 minute walk or wheelchair ride by 2052.$\backslash$n$\backslash$nPhase I of Trails ATL is scoped to deliver approximately 35 miles of new greenways and protected street trails spanning neighborhoods like Lakewood Heights, South Atlanta, Buckhead, and southwest Atlanta over a buildout decade from 2027 to 2037. This first phase carries an estimated price tag of \$252 million, reflecting December 2024 labor and materials pricing, with some trails to include lighting but excluding costs for security cameras, real estate acquisition, easements, etc.$\backslash$n$\backslash$nTo date, while more than 100 miles of trails have already been completed or are currently funded through existing infrastructure, the Trails ATL plan remains reliant on securing dedicated funding. Proposed sources include local bonds or levies such as a Transportation Special Local Option Sales Tax (TSPLOST) anticipated for 2027, alongside state and federal grants, philanthropic contributions, and partnerships. These funding pathways are essential to launch Phase I and sustain the ongoing project conveyor belt strategy, ensuring design, permitting, and construction phases are continuously active. \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.18e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} City of Austin, TX \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} United States of America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} North America \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.35e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} 41-50\% \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.16e+06 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.08e+13 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.16 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.64 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.8 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.45 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt}  \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.89e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97.6 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 97 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Extreme cold: In January 2023, winter storm Mara hit Central Texas causing the temperature to stay below zero for three days. However, the ice accumulated took almost a week to thaw and for the temperature to go back to normal. This resulted into increased collisions, power outages in cold weather shelters, hospitals and energy stations affecting 166,000 customers. $|$ Extreme heat: The year 2023 was Austin's hottest year on record with the hottest meteorological summer- defined as the months of June, July and August- even recorded at Austin's airport. The city hit triple digits temperature for the first time on June 9 which was about a month ahead of normal and stayed in similar ranges for about 80 days. This trend was observed last in 2011. $|$ Drought: 2011 was the worst single-year Texas drought since record keeping began — and, until Hurricane Harvey, may prove to be one of most devastating economic events in Texas history.Estimates by the Texas AgriLife Extension Service put Texas agricultural losses for the year at \$5.2 billion. A December economic analysis by BBVA Compass Bank foundthat indirect drought losses to the state's agricultural industries could add another \$3.5 billion to the toll. Impact were substantial on agriculture, trees and plants, industry, power generation, water supply, and residents. Although this year was unusually wet, we do not know if next year, or the following year, will bring extreme flooding or drought.. or both.Austin is currently impacted by severe drought. The combined storage level of water in Lakes Travis and Buchanan is currently at 1.409 million acre-feet and is projected to drop below 1.4 million acre-feet . Austin's Drought Contingency Plan sets a trigger at this storage level at which the City Manager will order the implementation of Stage 1 conservation measures. To give the community notice that these new restrictions are coming and consistent with the City's Water Conservation Code, City Manager Spencer Cronk has ordered implementation of Stage 1, effective June 6, 2022. This comes after over a 3-year stretch at Conservation Stage, the lowest stage of the Water Conservation Code.In Central Texas, droughts cause shifting soils, resulting in damage to roads, bridges, building foundations, and underground utilities. The highly elastic soils are primarily a long-term maintenance issue for roadways, given the potential for roadway damage resulting from extreme variations in precipitation and soil moisture (i.e. drought followed by heavy rainfall). $|$ Extreme cold: In February, 2021, winter storm Uri struck Texas, causing temperatures to plunge to record lows for over a week. This triggered a cascading series of systemic failures that led to over 4.5 million Texan homes and businesses losing power during that period. Approximately half of all homes lost access to running water for an average of two days. It was the single largest insurance claim event in state history, causing an estimated \$295 billion in damages. Increased extreme weather resilience planning is already under way at the City.The storm exposed vulnerabilities at multiple points in water distribution, including access to drinking water and sources for flushing toilets and hygiene. Low temperatures caused water mains to break, home and apartment complex pipes to rupture, and water loss resulting in storage and pressure failures. Hospitals lost access to water to supply boilers for heating. Community groups and elected officials mobilized to fill gaps. The City and County operated a community-wide distribution of drinking water. Austin Water purchased water totes, leased water tanker trucks, and deployed fire hydrant adapters to provide water. These efforts were hampered by road conditions, lack of pre-stocking supplies, coordination with food distribution, and shortfalls in targeting needs of vulnerable communities.Winter Storm Uri had a disproportionate impact on individuals that lack access to appropriate and nutritious food. Residents with greater resources were generally able to sustain access to food, especially if they had personal transportation and had strong social connections with neighbors and local familial networks who could provide support. The disruption in food supply chains, closure of grocery stores, hazardous road conditions, and other factors created additional barriers, worsening underlying food insecurity. Community-based organizations and individuals mobilized to meet unmet needs, as did City and County departments. But there were significant gaps in planning, response coordination, and staffing. $|$ Fire weather (risk of wildfires): In addition to being incredibly hot, the summer of 2023 was also very dry. These conditions contributed to several wildfires across Central Texas. With warmer, drier fire seasons and significant population growth in the wildland-urban interface (WUI), wildfire risk in Austin, Texas is increasing. Wildfire potential exists not just in the more forested portions of west Austin, but all around the city. On August 8, a 37-acres wildfire sparked in Cedar Park, a metro city in west Austin. Though they may exhibit less intensity than west-side crown fires, east-side grass and shrub fires can move extremely fast and pose significant threats to human health and safety, buildings, infrastructure, and water quality. Austin's most vulnerable populations largely are concentrated on the east side, a result of early 20th-century segregation policy and the legacy of discriminatory practices. Like other disasters, wildfires disproportionately affect the most vulnerable populations who are more likely to experience adverse outcomes because of their socioeconomic status, race, ethnicity, and age. Vulnerable populations are more likely to lack resources to prepare for, respond to, and recover from disasters, and they may experience cultural and institutional barriers, have limited mobility, and have compromised physical health. Increase in respiratory and cardiovascular illness and deaths caused by smoke from heat and drought-related wildfires. Based on climate change projections, the extreme heat, drought, and wildfires of the summer of 2011 will become less exceptional, resulting in changes to the way we plan for and respond to extreme weather events. $|$ Urban flooding: In April of 2023, north Austin received more than 4 inches of rain within just one hour. Walnut Creek received 1.52 inches in just 15 minutes causing flash flooding. The City's Fire department conducted 10 water rescues, while emergency crews saved 16 people from cars stuck in rising water. \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Loans from commercial banks$|$Public finance- national government$|$Private investment$|$Public finance- own budget$|$Bonds$|$Grants \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 7.8e+09\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 4e+09\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0.4}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Transport - Project Connect: Project Connect will expand and improve our public transportation network for the entire Central Texas region, including new light rail, a subway under downtown and an accessible bus system to better connect neighborhoods in and outside our great city. Project Connect is designed to improve access to essential jobs, health care and education-making our communities more livable, equitable and sustainable. CapMetro and the City of Austin have formed the Austin Transit Partnership (ATP), an independent organization that will guide the Project Connect investment with transparency and accountability throughout the program. In 2023, after five options for a light rail plan were released, City Council, ATP, and CapMetro agreed on an initial alignment. \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}-}
+\arrayrulecolor{black}
+\end{tabular}
+\end{threeparttable}\par\end{centerbox}
+
+\end{table}
+ 
+
+ 
+  \providecommand{\huxb}[2]{\arrayrulecolor[RGB]{#1}\global\arrayrulewidth=#2pt}
+  \providecommand{\huxvb}[2]{\color[RGB]{#1}\vrule width #2pt}
+  \providecommand{\huxtpad}[1]{\rule{0pt}{#1}}
+  \providecommand{\huxbpad}[1]{\rule[-#1]{0pt}{#1}}
+
+\begin{table}[ht]
+\begin{centerbox}
+\begin{threeparttable}
+ \label{tab:initial-inspection}
+\setlength{\tabcolsep}{0pt}
+\begin{tabular}{l l l l l l l l l l l l l l l l l l l l l l l l l l}
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}-}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} \textbf{firm\_id} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} \textbf{firm\_name} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} \textbf{firm\_hq} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} \textbf{industry} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{env\_score} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{env\_product} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{env\_co2s1} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{env\_co2s2} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{env\_co2s3} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{env\_energy} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{env\_contro} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{pol\_climate} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{pol\_energy} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{pol\_envsup} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{pol\_bio} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{pol\_socsup} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{fin\_asset} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{fin\_rev} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{fin\_cor} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{fin\_capex} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{fin\_roa} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{fin\_roe} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{fin\_ebitda} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{fin\_cr} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{fin\_dte} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0.4}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \textbf{marketcap} \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}-}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} OESTm.BA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Grupo Concesionario del Oeste SA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Argentina \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Construction \& Engineering \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 11.3\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 9.48e+07 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.45e+07 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.91e+07 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 8.62e+05 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 39.7\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 70.1\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 17.1\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.39\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -0.0675 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0.4}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 4.77e+07 \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} IEBm.BA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} IEB Construcciones SA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Argentina \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Construction \& Engineering \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 15.1\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.49e+07 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.75e+07 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.91e+07 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.02e+04 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -57.2\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -537\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -19.8\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0.579 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 6.68\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0.4}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 9.02e+06 \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} VALOm.BA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Banco de Valores SA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Argentina \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Banking Services \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 47.1\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.61e+03 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 8.75e+08 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.35e+08 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.31e+08 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 7.02e+04 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.31 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 20\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 18\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -15\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0.4}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.5e+08\hphantom{0} \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} TRANm.BA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Compania de Transporte de Energia Electrica en Alta Tension Transener SA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Argentina \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Electric Utilities \& IPPs \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 18.1\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.87e+08 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.06e+08 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 8.41e+07 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.36e+07 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.86 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.97 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 23.3\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.25\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -0.0654 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0.4}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.81e+08 \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} YPFDm.BA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} YPF SA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Argentina \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Oil \& Gas \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 82\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 9.41e+06 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.4e+06\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 7.68e+07 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.38e+08 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.65e+10 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 4.48e+09 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.69e+09 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.3e+09\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -12.4\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -34.4\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 22.2\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0.901 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0.825\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0.4}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.36e+09 \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} BHIPm.BA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Banco Hipotecario S.A. \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Argentina \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Banking Services \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 49.1\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.68e+04 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.24e+09 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -3.88e+07 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.33e+06 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 6.01 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 43.6\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -0.445\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0.4}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.08e+08 \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} CGPA2m.BA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Camuzzi Gas Pampeana SA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Argentina \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Natural Gas Utilities \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 13.1\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.06e+04 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 5.45e+05 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 9.41e+07 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.37e+08 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.15e+08 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 7.29e+06 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -3.23 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -8.05 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -1.75 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0.839 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -0.277\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0.4}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.02e+08 \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} CAPXm.BA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Capex SA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Argentina \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Oil \& Gas \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 34.1\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 7.36e+08 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.71e+08 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.84e+08 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 9.73e+07 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -6.4\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -16\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 27.4\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0.777 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0.982\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0.4}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 6.9e+08\hphantom{0} \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} CECO2m.BA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Central Costanera SA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Argentina \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Electric Utilities \& IPPs \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 40\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 6.4e+06\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 6.46e+04 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 9.65e+07 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.81e+07 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 4.9e+07\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.79e+06 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -49.8\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -79.3\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 21\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.08\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0.294\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0.4}}}{\cellcolor[RGB]{242, 242, 242}\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.97e+08 \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}|>{\huxb{0, 0, 0}{0.4}}|}
+\arrayrulecolor{black}
+
+\multicolumn{1}{!{\huxvb{0, 0, 0}{0.4}}l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} CARCm.BA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Carboclor SA \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Argentina \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{l!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedright \hspace{6pt} Freight \& Logistics Services \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0.539 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} \hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0}\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 0 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.14e+07 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.85e+06 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.3e+06\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.12e+06 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 3.04 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 4.42 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 8.36 \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 2.72\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} -0.255\hphantom{0} \hspace{6pt}\huxbpad{6pt}} &
+\multicolumn{1}{r!{\huxvb{0, 0, 0}{0.4}}}{\huxtpad{6pt + 1em}\raggedleft \hspace{6pt} 1.26e+07 \hspace{6pt}\huxbpad{6pt}} \tabularnewline[-0.5pt]
+
+
+\hhline{>{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}->{\huxb{0, 0, 0}{0.4}}-}
+\arrayrulecolor{black}
+\end{tabular}
+\end{threeparttable}\par\end{centerbox}
+
+\end{table}
+ 
+
+\textbf{Interpretation.} \texttt{env\_projects.csv} has 2590 rows (one
+row = one planned project) and 26 columns; \texttt{env\_controversy.csv}
+has 7275 firms (one row per firm) and 26 columns.
+
+\end{document}

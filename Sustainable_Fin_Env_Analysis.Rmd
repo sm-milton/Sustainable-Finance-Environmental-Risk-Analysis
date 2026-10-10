@@ -1,0 +1,85 @@
+---
+title: "Individual Task 2: Sustainable Infrastructure and Responsible Investment Analysis"
+author: "Sheikh Mohammad Milton"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    df_print: paged
+  pdf_document:
+    toc: true
+    toc_depth: '3'
+editor_options:
+  chunk_output_type: console
+---
+
+```{r}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+# Introduction
+
+## Business context
+
+I am an entry-level analyst at an investment firm that finances **sustainable infrastructure** and applies **responsible-investment** principles. My line manager asked for four pieces of work:
+
+1. Most common climate hazards affecting communities globally
+2. Number of planned projects and total funding sought, by region
+3. Ranked list of collaboration / investment opportunities
+4. Best model to predict environmental controversy involvement, with evaluation
+
+**How I will work.** For every step I first explain *why* I am doing it and *how*, then run the R code, then *interpret* the result. All data preparation is done in R (nothing is edited in Excel), and I never type in data values by hand; every number comes from the two CSV files.
+
+## Load packages
+
+```{r packages}
+# Install and load packages
+
+if(!require("pacman"))install.packages("pacman")
+
+pacman::p_load(readr, dplyr, tidyr, stringr, lubridate, purrr, ggplot2, gridExtra, GGally, corrplot)
+pacman::p_load(tidytext, textstem, wordcloud, textdata, topicmodels)
+pacman::p_load(DescTools, skimr, finalfit, rstatix, huxtable, jtools)
+pacman::p_load(knitr, easystats, gtsummary, gt, scales)
+pacman::p_load(SnowballC, textstem)
+pacman::p_load(caret, tibble)
+```
+
+# Data Import and Initial Inspection
+
+## Import the dataset
+
+```{r read-data}
+projects_raw <- read_csv("env_projects.csv")
+firms_raw <- read_csv("env_controversy.csv")
+```
+
+## Understanding Data
+
+```{r initial-inspection}
+dim(projects_raw)
+dim(firms_raw)
+
+str(projects_raw)
+str(firms_raw)
+
+glimpse(projects_raw)
+glimpse(firms_raw)
+
+head(projects_raw, 10)
+head(firms_raw, 10)
+```
+
+**Interpretation.** `env_projects.csv` has `r nrow(projects_raw)` rows (one row = one planned project) and `r ncol(projects_raw)` columns; `env_controversy.csv` has `r nrow(firms_raw)` firms (one row per firm) and `r ncol(firms_raw)` columns.
+
+## Duplicate Data Checking
+```{r}
+
+```
+
+## Missing Value Checking
+```{r}
+
+```
