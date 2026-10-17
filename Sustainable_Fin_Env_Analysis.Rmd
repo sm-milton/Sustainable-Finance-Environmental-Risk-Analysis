@@ -39,7 +39,7 @@ I am an entry-level analyst at an investment firm that finances **sustainable in
 
 if(!require("pacman"))install.packages("pacman")
 
-pacman::p_load(tidyverse, tidytext, knitr, scales, caret, pROC, MLmetrics, ranger, glmnet, rpart, patchwork, topicmodels, slam, corrplot, factoextra)
+pacman::p_load(tidyverse, tidytext, knitr, scales, caret, pROC, MLmetrics, ranger, glmnet, rpart, patchwork, topicmodels, slam, corrplot, factoextra, tidymodels, rpart.plot, kknn, glmnet)
 
 # tidyverse : dplyr, tidyr, ggplot2, stringr, forcats, readr
 # tidytext  : tokenising text
@@ -1204,89 +1204,149 @@ graphics.off()
 
 # Part 4: Predicting environmental controversy risk
 
-## 4.1 Understanding the business problem
+## Understanding the business problem
 
-**Goal:** build a classification model that predicts whether a firm is involved in an environmental controversy (`env_contro = Yes`). The model is for **initial screening**: firms flagged as high risk will be reviewed by experts.
+Ultimate goal is to build a classification model that predicts whether a firm is involved in an environmental controversy (`env_contro = Yes`). The model is for **initial screening**: firms flagged as high risk will be reviewed by experts.
 
-**What this means for how I judge the model:**
+**Judgement:**
 
-* Only about 2.8% of firms are positives, so a model that says "No controversy" for everybody would be 97% accurate and completely useless. **Accuracy is therefore not a good metric here.**
-* The scenario says **false positives are relatively cheap** (an expert simply reviews a firm that turns out to be fine) but **false negatives are costly** (a risky firm slips through). So I care most about **sensitivity (recall)**: the share of truly controversial firms that we catch.
+* Only about 2.8% of firms are positives, so a model that says "No controversy" for everybody would be 97% accurate and completely useless. Accuracy is therefore not a good metric here.
+
+* The scenario says false positives are relatively cheap but **false negatives are costly** (a risky firm slips through). So I care most about **sensitivity (recall)**: the share of truly controversial firms that we catch.
+
 * I will still watch **precision** and the **share of firms flagged**, because experts have limited time.
+
 * To compare models fairly without choosing a threshold I use **ROC AUC** and **PR AUC** (area under the precision-recall curve; this is more informative than ROC AUC when positives are rare). Then I choose the final decision **threshold** separately, using the **F2 score**, which weights recall more heavily than precision.
 
-## 4.2 Data preparation
+## Data preparation
 
 ### Feature engineering and the train / test split
 
-My steps and why:
+Steps followed:
 
 1. **Create ratio features.** Raw emissions, energy and capital expenditure mostly reflect firm *size*. Dividing by revenue or assets (intensity) tells me whether the firm is *inefficient for its size*.
-2. **Split the data first** into a training set (75%) and a test set (25%), stratified by the outcome so both sets keep about 2.8% positives. The test set stays untouched until the very end, to give an honest estimate of performance on new firms.
-3. **Do all learning (transformations, imputation, tuning) on the training set only**, using a `recipe`, so no information from the test set leaks into the model.
 
-```{r firm-split}
+2. **Split the data first** into a training set (75%) and a test set (25%), stratified by the outcome so both sets keep about 2.8% positives. The test set stays untouched until the very end, to give an honest estimate of performance on new firms.
+
+3. **Learn all pre-processing rules (medians, transformations, scaling) from the training set only**, then apply the same rules to the test set, so no information from the test set leaks into the model.
+
+I build the whole machine-learning workflow with **base R and a few classic packages** (`rpart`, `glmnet`, `pROC`, `class`). This is a transparent way to see exactly what happens in each step, and it needs no extra modelling framework.
+
+```{r firm-features}
 firm_df <- firms |>
   mutate(co2_intensity    = if_else(fin_rev > 0,   (env_co2s1 + env_co2s2) / fin_rev, NA_real_),
          energy_intensity = if_else(fin_rev > 0,   env_energy / fin_rev,              NA_real_),
          capex_intensity  = if_else(fin_asset > 0, fin_capex / fin_asset,             NA_real_))
+```
 
-set.seed(2026)
-firm_split <- initial_split(firm_df, prop = 0.75, strata = env_contro)
-train <- training(firm_split)
-test  <- testing(firm_split)
+```{r firm-split}
+split_idx <- unlist(lapply(split(seq_len(nrow(firm_df)), firm_df$env_contro),
+                           function(i) sample(i, round(0.75 * length(i)))))
+train <- firm_df[sort(split_idx), ]
+test  <- firm_df[-split_idx, ]
+```
 
+```{r firm-split-show, echo=FALSE}
 tibble(set = c("Training", "Test"),
        firms = c(nrow(train), nrow(test)),
        controversies = c(sum(train$env_contro == "Yes"), sum(test$env_contro == "Yes")),
-       share = c(mean(train$env_contro == "Yes"), mean(test$env_contro == "Yes"))) |>
-  mutate(share = percent(share, accuracy = 0.01)) |>
+       share = percent(c(mean(train$env_contro == "Yes"), mean(test$env_contro == "Yes")), accuracy = 0.01)) |>
   kable(caption = "Both sets keep the same share of controversial firms (stratified split)")
 ```
 
-**Interpretation:** the stratified split keeps the same class balance in both sets. The test set has only about 50 controversial firms, so test results will be noisy and I will report an uncertainty range later.
+**Findings:** the stratified split keeps the same class balance in both sets. The test set has only about 50 controversial firms, so test results will be noisy and I will report an uncertainty range later.
 
-### Pre-processing recipe
-
-Why each step:
-
-| Step | Why |
-|------|-----|
-| Missing-value indicators (`step_indicate_na`) | Missing emissions or cost data often means "not disclosed", which could itself be a signal. |
-| Median imputation | Models such as logistic regression and KNN cannot handle missing values. The median is robust to outliers. |
-| Yeo-Johnson transformation | Financial and emission variables are extremely right-skewed, and some (ROE, revenue) contain negative values, so a log transform would fail. Yeo-Johnson handles negatives. |
-| Normalisation | KNN uses distances and logistic regression / PCA work better when variables are on the same scale. |
-| Lump rare categories | Industry has 59 levels and headquarters country has 63; I keep categories with at least 1% of firms and group the rest as "other". |
-| Dummy variables | Models need numbers, not text categories. |
-
-```{r firm-recipe}
-cont_vars <- c("env_score", "env_co2s1", "env_co2s2", "env_co2s3", "env_energy",
-               "fin_asset", "fin_rev", "fin_cor", "fin_capex", "fin_roa", "fin_roe",
-               "fin_ebitda", "fin_cr", "fin_dte", "marketcap",
-               "co2_intensity", "energy_intensity", "capex_intensity")
-
-na_vars <- c("env_co2s1", "env_co2s2", "env_co2s3", "env_energy", "fin_cor", "fin_cr")
-
-rec_base <- recipe(env_contro ~ ., data = train) |>
-  update_role(firm_id, firm_name, new_role = "id") |>      # identifiers are not predictors
-  step_indicate_na(all_of(na_vars)) |>
-  step_impute_median(all_of(cont_vars)) |>
-  step_YeoJohnson(all_of(cont_vars)) |>
-  step_normalize(all_of(cont_vars)) |>
-  step_novel(all_nominal_predictors()) |>
-  step_other(industry, firm_hq, threshold = 0.01) |>
-  step_dummy(all_nominal_predictors()) |>
-  step_zv(all_predictors())
-
-rec_prep     <- prep(rec_base, training = train)
-train_baked  <- bake(rec_prep, new_data = NULL)
-
-cat("Predictors after pre-processing:", ncol(train_baked) - 3, "\n")   # minus id columns and outcome
+```{r}
+rm(firm_df, split_idx)
+graphics.off()
 ```
 
-## 4.3 Exploratory data analysis and bivariate analysis (training data only)
+### Pre-processing rules
 
-I explore only the **training** data so that the test set stays unseen.
+1. Missing-value indicators: Missing emissions or cost data often means "not disclosed", which could itself be a signal
+
+2. Median imputation: Logistic regression and KNN cannot handle missing values. The median is robust to outliers.
+
+3. Yeo-Johnson transformation: Financial and emission variables are extremely right-skewed, and some (ROE, revenue) contain negative values, so a log transform would fail. Yeo-Johnson handles negatives. I estimate its parameter (lambda) by maximum likelihood.
+
+4. Standardisation (mean 0, sd 1): KNN uses distances, and PCA and penalised regression work better when variables are on the same scale.
+
+5.Lump rare categories: Industry has 59 levels and headquarters country has 63; I keep categories with at least 1% of training firms and group the rest as "other".
+
+6. Dummy variables: Models need numbers, not text categories.
+
+7. Drop zero-variance columns: A column that never changes carries no information.
+
+I write the pre-processing as two functions: `learn_prep()` learns the rules from a data set, and `apply_prep()` applies them to any data.
+
+```{r firm-prep}
+cont_vars <- c("env_score", "env_co2s1", "env_co2s2", "env_co2s3", "env_energy", "fin_asset", "fin_rev", "fin_cor", "fin_capex", "fin_roa", "fin_roe", "fin_ebitda", "fin_cr", "fin_dte", "marketcap","co2_intensity", "energy_intensity", "capex_intensity")
+
+na_vars  <- c("env_co2s1", "env_co2s2", "env_co2s3", "env_energy", "fin_cor", "fin_cr")
+
+bin_vars <- c("pol_climate", "pol_energy", "pol_envsup", "pol_bio", "pol_socsup", "env_product")
+
+# Yeo-Johnson transformation (works for negative values too)
+yj_trans <- function(x, lambda) {
+  out <- numeric(length(x)); pos <- x >= 0
+  out[pos]  <- if (abs(lambda) > 1e-8) ((x[pos] + 1)^lambda - 1) / lambda else log1p(x[pos])
+  out[!pos] <- if (abs(lambda - 2) > 1e-8) -((-x[!pos] + 1)^(2 - lambda) - 1) / (2 - lambda) else -log1p(-x[!pos])
+  out
+}
+
+# choose lambda by maximum likelihood (same idea as step_YeoJohnson in tidymodels)
+yj_lambda <- function(x) {
+  suppressWarnings(optimize(function(l) -length(x) / 2 * log(var(yj_trans(x, l))) + (l - 1) * sum(sign(x) * log1p(abs(x))),
+           interval = c(-5, 5), maximum = TRUE))$maximum
+}
+
+# step 1: LEARN the pre-processing rules from a training set only
+learn_prep <- function(d) {
+  p <- list()
+  p$median <- map_dbl(d[cont_vars], median, na.rm = TRUE)
+  imputed  <- map2(d[cont_vars], p$median, ~ replace(.x, is.na(.x), .y))
+  p$lambda <- map_dbl(imputed, yj_lambda)
+  trans    <- map2(imputed, p$lambda, yj_trans)
+  p$mean   <- map_dbl(trans, mean)
+  p$sd     <- map_dbl(trans, sd)
+  keep_levels <- function(v) names(which(prop.table(table(d[[v]])) >= 0.01))   # categories with at least 1% of firms
+  p$industry_keep <- keep_levels("industry")
+  p$hq_keep       <- keep_levels("firm_hq")
+  p$zv <- character(0)
+  p$zv <- names(which(map_dbl(select(apply_prep(d, p), -env_contro), sd) == 0))   # zero-variance columns
+  p
+}
+
+# step 2: APPLY the learned rules to any data (training, validation fold or test)
+apply_prep <- function(d, p) {
+  out <- tibble(.rows = nrow(d))
+  for (v in na_vars) out[[paste0("na_ind_", v)]] <- as.integer(is.na(d[[v]]))
+  for (v in cont_vars) {
+    x <- d[[v]]; x[is.na(x)] <- p$median[[v]]
+    out[[v]] <- (yj_trans(x, p$lambda[[v]]) - p$mean[[v]]) / p$sd[[v]]
+  }
+  for (v in bin_vars) out[[v]] <- d[[v]]
+  ind <- if_else(d$industry %in% p$industry_keep, d$industry, "other")
+  hq  <- if_else(d$firm_hq  %in% p$hq_keep,       d$firm_hq,  "other")
+  for (lv in setdiff(c(sort(p$industry_keep), "other"), sort(p$industry_keep)[1]))
+    out[[make.names(paste0("industry_", lv))]] <- as.integer(ind == lv)
+  for (lv in setdiff(c(sort(p$hq_keep), "other"), sort(p$hq_keep)[1]))
+    out[[make.names(paste0("hq_", lv))]] <- as.integer(hq == lv)
+  out <- out[, setdiff(names(out), p$zv), drop = FALSE]
+  out$env_contro <- d$env_contro
+  out
+}
+
+prep_obj    <- learn_prep(train)
+train_baked <- apply_prep(train, prep_obj)
+test_baked  <- apply_prep(test,  prep_obj)
+
+cat("Predictors after pre-processing:", ncol(train_baked) - 1, "\n")
+```
+
+## Exploratory data analysis and bivariate analysis (training data only)
+
+I explore only the training data so that the test set stays unseen.
 
 ```{r firm-eda-balance, fig.height=4}
 train |>
@@ -1301,7 +1361,12 @@ train |>
        x = "Involved in an environmental controversy?", y = "Firms (training set)")
 ```
 
-**Interpretation:** about 97% of firms have no controversy. Any model must handle this imbalance, otherwise it will simply predict "No" for everyone.
+**Findings:** about 97% of firms have no controversy. Any model must handle this imbalance, otherwise it will simply predict "No" for everyone.
+
+```{r}
+rm(test, bin_vars, yj_lambda, yj_trans)
+graphics.off()
+```
 
 ### Industry and country
 
@@ -1334,10 +1399,15 @@ ph <- ggplot(hq_tbl, aes(x = rate, y = reorder(firm_hq, rate))) +
   labs(title = "Controversy rate by headquarters country (top 10, at least 30 firms)",
        x = "Share of firms with a controversy", y = NULL)
 
-pi / ph
+wrap_plots(pi, ph, ncol = 1)
 ```
 
-**Interpretation:** controversy rates are clearly higher in resource-heavy industries (oil and gas and related services are far above average) and in some countries. This is a strong sign that **industry and country carry predictive information**, which is why I keep them (grouped) in the model.
+**Findings:** controversy rates are clearly higher in resource-heavy industries (oil and gas and related services are far above average) and in some countries. This is a strong sign that **industry and country carry predictive information**, which is why I keep them (grouped) in the model.
+
+```{r}
+rm(hq_tbl, ind_tbl, perp_obj, ph, pi) 
+graphics.off()
+```
 
 ### Numeric variables by outcome (distributions and tests)
 
@@ -1358,8 +1428,7 @@ ggplot(eda_long, aes(x = env_contro, y = value, fill = env_contro)) +
 ```
 
 ```{r firm-eda-tests}
-test_vars <- c("env_score", "env_product", "marketcap", "fin_asset", "fin_rev", "fin_roa", "fin_roe",
-               "fin_ebitda", "fin_dte", "env_co2s1", "env_energy", "co2_intensity")
+test_vars <- c("env_score", "env_product", "marketcap", "fin_asset", "fin_rev", "fin_roa", "fin_roe", "fin_ebitda", "fin_dte", "env_co2s1", "env_energy", "co2_intensity")
 
 num_tests <- map_dfr(test_vars, function(v) {
   x <- train[[v]]; y <- train$env_contro
@@ -1378,14 +1447,17 @@ kable(num_tests, digits = c(0, 3, 3, 4, 0), format.args = list(big.mark = ",", s
 t.test(log10(marketcap + 1) ~ env_contro, data = train)
 ```
 
-**Interpretation:** I use the **Wilcoxon test** because these variables are very skewed and have outliers. Variables with small p-values (typically firm size measures such as market capitalisation, assets and revenue, and emissions) differ significantly between the two groups: controversial firms tend to be **bigger and higher-emitting**. The Welch t-test on log market capitalisation confirms the size difference. Remember that statistical significance only tells me a difference exists, not that it is large enough to predict well on its own.
+**Findings:** I use the **Wilcoxon test** because these variables are very skewed and have outliers. Variables with small p-values (typically firm size measures such as market capitalisation, assets and revenue, and emissions) differ significantly between the two groups: controversial firms tend to be **bigger and higher-emitting**. The Welch t-test on log market capitalisation confirms the size difference. Remember that statistical significance only tells me a difference exists, not that it is large enough to predict well on its own.
+
+```{r}
+rm(eda_long, test_vars, num_tests)
+graphics.off()
+```
 
 ### Policies and controversy
 
 ```{r firm-eda-policy, fig.height=5}
-pol_vars <- c(pol_climate = "Climate policy", pol_energy = "Energy verification policy",
-              pol_envsup = "Environmental supplier policy", pol_bio = "Biodiversity policy",
-              pol_socsup = "Social supplier policy", env_product = "Green products")
+pol_vars <- c(pol_climate = "Climate policy", pol_energy = "Energy verification policy",pol_envsup = "Environmental supplier policy", pol_bio = "Biodiversity policy", pol_socsup = "Social supplier policy", env_product = "Green products")
 
 pol_tbl <- map_dfr(names(pol_vars), function(v) {
   tab <- table(train[[v]], train$env_contro)
@@ -1410,7 +1482,14 @@ pol_tbl |> mutate(across(starts_with("rate"), ~ percent(.x, accuracy = 0.1)), p_
   kable(caption = "Chi-squared tests of independence between each policy and controversy")
 ```
 
-**Interpretation:** the direction may look counter-intuitive: firms that *have* environmental policies show a *higher* controversy rate. I think this is not because policies cause controversies. Instead, **large firms are more likely to both publish policies and attract media attention** (my explanation: a confounding effect of size). Chi-squared tests show which differences are statistically significant. This is an important reminder that the model finds *associations*, so it should be used for screening and not for blaming firms.
+**Findings:** The direction may look counter-intuitive: firms that have environmental policies show a higher controversy rate. I think this is not because policies cause controversies. Instead, large firms are more likely to both publish policies and attract media attention.
+
+Chi-squared tests show which differences are statistically significant: in my output every policy difference is significant at the 5% level except the share of green products. This is an important reminder that the model finds associations, so it should be used for screening and not for blaming firms.
+
+```{r}
+rm(pol_vars, pol_tbl)
+graphics.off()
+```
 
 ### Missing data as a signal and correlations
 
@@ -1434,23 +1513,30 @@ corrplot(cor(select(train_baked, all_of(cont_vars)), use = "pairwise.complete.ob
          title = "Correlation between the (transformed) numeric predictors", mar = c(0, 0, 2, 0))
 ```
 
-**Interpretation:** firms that report emissions data are more often involved in controversies than firms that do not report (probably because reporting firms are larger and more visible). The correlation plot shows strong correlations among the size variables (assets, revenue, costs, market capitalisation, capex) and among the emission variables. This **multicollinearity** can make logistic regression coefficients unstable, and it is a good reason to try PCA.
+**Findings:** firms that report emissions data are more often involved in controversies than firms that do not report (probably because reporting firms are larger and more visible). The correlation plot shows strong correlations among the size variables (assets, revenue, costs, market capitalisation, capex) and among the emission variables. This multicollinearity can make logistic regression coefficients unstable, and it is a good reason to try PCA.
 
-## 4.4 Dimensionality reduction (PCA) and cluster analysis
+```{r}
+graphics.off()
+```
 
-### PCA on the numeric predictors
+## Dimensionality reduction (PCA) and cluster analysis
 
-**Why:** many predictors are correlated. PCA replaces them with a smaller number of uncorrelated components. I run it on the *pre-processed* training data (already transformed and standardised).
+### PCA on the numeric predictors:
+
+Many predictors are correlated. PCA replaces them with a smaller number of uncorrelated components. I run it on the pre-processed training data (already transformed and standardised).
 
 ```{r firm-pca, fig.height=5.5}
 pca_firm <- prcomp(select(train_baked, all_of(cont_vars)), scale. = FALSE)
 
-(fviz_eig(pca_firm, addlabels = TRUE, ncp = 10, barfill = col_main, barcolor = col_main) +
-    labs(title = "Variance explained by principal components")) |
-  (fviz_pca_var(pca_firm, col.var = "contrib", gradient.cols = c(col_grey, col_accent), repel = TRUE) +
-     labs(title = "Which variables drive PC1 and PC2?"))
+wrap_plots(
+  fviz_eig(pca_firm, addlabels = TRUE, ncp = 10, barfill = col_main, barcolor = col_main) +
+    labs(title = "Variance explained by principal components"),
+  fviz_pca_var(pca_firm, col.var = "contrib", gradient.cols = c(col_grey, col_accent), repel = TRUE) +
+    labs(title = "Which variables drive PC1 and PC2?"),
+  nrow = 1)
 
 cum_var <- summary(pca_firm)$importance["Cumulative Proportion", ]
+
 tibble(components = c(3, 5, 8, 10), cumulative_variance = percent(cum_var[c(3, 5, 8, 10)], accuracy = 1)) |>
   kable(caption = "Cumulative variance explained")
 ```
@@ -1468,16 +1554,20 @@ ggplot(pca_scores |> arrange(env_contro), aes(PC1, PC2, colour = env_contro, alp
        colour = "Controversy", alpha = "Controversy", size = "Controversy")
 ```
 
-**Interpretation:** the first components capture the size and emissions dimension (PC1) and the profitability / leverage dimension (later components). The scatter plot shows that the two groups **overlap heavily**: controversial firms are not separated cleanly from the others. This warns me that the prediction task is hard and that I should not expect a near-perfect model. I will use PCA as an alternative pre-processing choice for logistic regression in 4.6.
+**Findings:** the first components capture the size and emissions dimension (PC1) and the profitability / leverage dimension (later components). The scatter plot shows that the two groups overlap heavily: controversial firms are not separated cleanly from the others. This warns me that the prediction task is hard and that I should not expect a near-perfect model. I will use PCA as an alternative pre-processing choice for logistic regression in 4.6.
+
+```{r}
+rm(pca_firm, cum_var)
+graphics.off()
+```
 
 ### Cluster analysis (k-means) of firms
 
-**Why:** clustering is unsupervised, so it does not use the outcome. If some clusters of similar firms have a much higher controversy rate, this tells me there are **firm "types"** that carry more environmental risk.
+Clustering is unsupervised, so it does not use the outcome. If some clusters of similar firms have a much higher controversy rate, this tells me there are firm "types" that carry more environmental risk.
 
 I pick the number of clusters with the silhouette method (on a sample of firms, because silhouette needs all pairwise distances).
 
 ```{r firm-kmeans-k, fig.height=4}
-set.seed(2026)
 samp <- pca_scores |> select(starts_with("PC")) |> slice_sample(n = 2000)
 
 sil_tbl <- map_dfr(2:8, function(k) {
@@ -1496,7 +1586,6 @@ ggplot(sil_tbl, aes(x = k, y = avg_silhouette)) +
 ```
 
 ```{r firm-kmeans-fit, fig.height=5}
-set.seed(2026)
 k_use <- 3   # see the explanation below the plot
 km_firm <- kmeans(select(pca_scores, starts_with("PC")), centers = k_use, nstart = 25)
 pca_scores$cluster <- factor(km_firm$cluster)
@@ -1532,190 +1621,268 @@ ggplot(cluster_tbl, aes(x = cluster, y = controversy_rate, fill = cluster)) +
 top_cl <- cluster_tbl |> slice_max(controversy_rate, n = 1)
 ```
 
-**Interpretation:** the silhouette method gives its highest score at k = `r k_best`, but with k = 2 the split is very coarse (roughly "big" vs "small" firms). I used **k = 3** because the silhouette is still reasonable and the third cluster separates out a small group of very large firms, which is more useful for risk screening (this is my judgement call, and I note that cluster numbers can change if the seed changes). The table and chart show that **cluster `r top_cl$cluster`** is the high-risk group: it has `r comma(top_cl$firms)` firms (about `r percent(top_cl$firms / nrow(train), accuracy = 1)` of the training data) but a controversy rate of `r percent(top_cl$controversy_rate, accuracy = 0.1)`, which is about `r round(top_cl$controversy_rate / base_rate, 1)` times the overall rate (`r percent(base_rate, accuracy = 0.1)`). These are the largest firms (median market capitalisation about USD `r comma(top_cl$median_marketcap_m, accuracy = 1)` million) with the highest environmental scores and the highest share of climate policies. The other clusters sit near or below the average. This agrees with the Wilcoxon and policy results: **large, well-disclosing firms attract the most controversy**. Because the clusters were built without the outcome, this link is genuine information that the supervised models can also use.
+**Findings:** The silhouette method gives its highest score at k = `r k_best`, but with k = 2 the split is very coarse (roughly "big" vs "small" firms). I used k = 3 because the silhouette is still reasonable and the third cluster separates out a small group of very large firms, which is more useful for risk screening (this is my judgement call, and I note that cluster numbers can change if the seed changes). The table and chart show that **cluster `r top_cl$cluster`** is the high-risk group: it has `r comma(top_cl$firms)` firms (about `r percent(top_cl$firms / nrow(train), accuracy = 1)` of the training data) but a controversy rate of `r percent(top_cl$controversy_rate, accuracy = 0.1)`, which is about `r round(top_cl$controversy_rate / base_rate, 1)` times the overall rate (`r percent(base_rate, accuracy = 0.1)`). 
 
-## 4.5 Resampling plan and metrics
+These are the largest firms (median market capitalisation about USD `r comma(top_cl$median_marketcap_m, accuracy = 1)` million) with the highest environmental scores and the highest share of climate policies. The other clusters sit near or below the average. 
 
-I use **5-fold cross-validation stratified by the outcome** on the training set. Every candidate model and every tuning value is scored on data it was not trained on, which protects against overfitting. I tune on **ROC AUC**, and I also record **PR AUC**.
+This agrees with the Wilcoxon and policy results: **large, well-disclosing firms attract the most controversy**. Because the clusters were built without the outcome, this link is genuine information that the supervised models can also use.
+
+## Resampling plan and metrics
+
+I use **5-fold cross-validation stratified by the outcome** on the training set. The training firms are split into five groups; each model is trained on four groups and scored on the fifth, and this is repeated five times. Every candidate model and every tuning value is therefore scored on data it was not trained on, which protects against overfitting. The pre-processing is re-learned inside each fold, so the validation fold never influences the medians or scaling.
+
+I tune on **ROC AUC** and also record **PR AUC** (computed as average precision). The helper functions below build the folds, the metrics and the cross-validation loop.
 
 ```{r cv-folds}
-set.seed(2026)
-folds <- vfold_cv(train, v = 5, strata = env_contro)
-cv_metrics <- metric_set(roc_auc, pr_auc)
-ctrl_tune  <- control_grid(save_pred = TRUE)
-ctrl_res   <- control_resamples(save_pred = TRUE)
-folds
+fold_id <- integer(nrow(train))
+for (cl in c("Yes", "No")) {                        # stratified: folds keep the share of positives
+  i <- which(train$env_contro == cl)
+  fold_id[i] <- sample(rep(1:5, length.out = length(i)))
+}
+table(fold_id, train$env_contro)
+
+# pre-processing is learned INSIDE each fold (no leakage from the validation fold)
+fold_data <- map(1:5, function(f) {
+  p <- learn_prep(train[fold_id != f, ])
+  list(tr = apply_prep(train[fold_id != f, ], p), te = apply_prep(train[fold_id == f, ], p),
+       te_rows = which(fold_id == f))
+})
+
+# metrics
+y01     <- function(y) as.integer(y == "Yes")
+auc_fn  <- function(y, p) as.numeric(pROC::auc(y01(y), p, levels = c(0, 1), direction = "<", quiet = TRUE))
+ap_fn   <- function(y, p) { o <- order(p, decreasing = TRUE); yy <- y01(y)[o]; sum((cumsum(yy) / seq_along(yy))[yy == 1]) / sum(yy) }   # average precision (PR AUC)
 ```
 
-## 4.6 Models
+```{r model-funs}
+# every model function: fit on `tr`, return P(controversy = Yes) for `te`
+x_of <- function(d) as.data.frame(select(d, -env_contro))
+
+fit_logit <- function(tr, te, ...) {
+  m <- suppressWarnings(glm(y ~ ., data = cbind(x_of(tr), y = y01(tr$env_contro)), family = binomial))
+  suppressWarnings(predict(m, x_of(te), type = "response"))
+}
+
+fit_logit_pca <- function(tr, te, num_comp, ...) {
+  pc   <- prcomp(tr[cont_vars])
+  rest <- setdiff(names(tr), c(cont_vars, "env_contro"))
+  mk   <- function(d) cbind(as.data.frame(predict(pc, d[cont_vars])[, 1:num_comp, drop = FALSE]), d[rest])
+  m <- suppressWarnings(glm(y ~ ., data = cbind(mk(tr), y = y01(tr$env_contro)), family = binomial))
+  suppressWarnings(predict(m, mk(te), type = "response"))
+}
+
+fit_enet <- function(tr, te, alpha, lambdas, ...) {      # returns one column per lambda
+  m <- glmnet(as.matrix(x_of(tr)), y01(tr$env_contro), family = "binomial", alpha = alpha, lambda = lambdas)
+  predict(m, as.matrix(x_of(te)), s = lambdas, type = "response")
+}
+
+fit_tree <- function(tr, te, cp, maxdepth, minsplit, ...) {
+  m <- rpart(env_contro ~ ., data = tr, method = "class", parms = list(prior = c(0.5, 0.5)),
+             control = rpart.control(cp = cp, maxdepth = maxdepth, minsplit = minsplit, xval = 0))
+  predict(m, te, type = "prob")[, "Yes"]
+}
+
+fit_knn <- function(tr, te, k, ...) {
+  kk <- class::knn(x_of(tr), x_of(te), cl = tr$env_contro, k = k, prob = TRUE)
+  ifelse(kk == "Yes", attr(kk, "prob"), 1 - attr(kk, "prob"))
+}
+
+# cross-validation of one model over a grid of settings (one row = one setting)
+cv_grid <- function(fun, grid) {
+  map_dfr(seq_len(nrow(grid)), function(i) {
+    per_fold <- map_dfr(1:5, function(f) {
+      d <- fold_data[[f]]
+      p <- do.call(fun, c(list(tr = d$tr, te = d$te), as.list(grid[i, , drop = FALSE])))
+      tibble(roc = auc_fn(d$te$env_contro, p), pr = ap_fn(d$te$env_contro, p))
+    })
+    bind_cols(grid[i, , drop = FALSE],
+              tibble(mean_roc_auc = mean(per_fold$roc), se_roc_auc = sd(per_fold$roc) / sqrt(5),
+                     mean_pr_auc  = mean(per_fold$pr),  se_pr_auc  = sd(per_fold$pr)  / sqrt(5)))
+  })
+}
+
+# out-of-fold predictions for one chosen setting (every training firm predicted by a model that did not see it)
+oof_pred <- function(fun, params) {
+  out <- numeric(nrow(train))
+  for (f in 1:5) {
+    d <- fold_data[[f]]
+    out[d$te_rows] <- do.call(fun, c(list(tr = d$tr, te = d$te), params))
+  }
+  out
+}
+```
+
+## Models
 
 I build five candidate models, all using the same cross-validation folds so that the comparison is fair.
 
-| Model | Idea | How I handle the imbalance |
-|-------|------|----------------------------|
-| **Logistic regression** | Linear model of the log-odds; easy to interpret (odds ratios) | I judge it by AUC and choose a low threshold later. |
-| **Logistic regression + PCA** | Same, but on principal components to remove multicollinearity | I tune the number of components. |
-| **Elastic-net logistic regression** | Logistic regression with a penalty that shrinks unimportant coefficients towards zero (a mix of ridge and lasso), which helps when there are many correlated predictors | I tune the penalty and the ridge/lasso mixture. |
-| **Decision tree** | Rules of the form "if X > a then ..."; easy to explain to managers | I give both classes equal prior weight (`prior = c(0.5, 0.5)`), so the tree does not ignore the rare class. |
-| **K-nearest neighbours (KNN)** | Predicts from the most similar firms | I tune the number of neighbours. |
+**1. Logistic regression:** Linear model of the log-odds; easy to interpret (odds ratios). I judge it by AUC and choose a low threshold later.
 
-```{r model-specs}
-log_spec <- logistic_reg() |>
-  set_engine("glm") |>
-  set_mode("classification")
+**2. Logistic regression + PCA:** Same, but on principal components to remove multicollinearity. I tune the number of components.
 
-tree_spec <- decision_tree(cost_complexity = tune(), tree_depth = tune(), min_n = tune()) |>
-  set_engine("rpart", parms = list(prior = c(0.5, 0.5))) |>
-  set_mode("classification")
+**3. Elastic-net logistic regression:** Logistic regression with a penalty that shrinks unimportant coefficients towards zero (a mix of ridge and lasso), which helps when there are many correlated predictors. I tune the penalty and the ridge/lasso mixture (`alpha`).
 
-en_spec <- logistic_reg(penalty = tune(), mixture = tune()) |>
-  set_engine("glmnet") |>
-  set_mode("classification")
+**4. Decision tree:** Rules of the form "if X > a then ..."; easy to explain to managers. I give both classes equal prior weight (`prior = c(0.5, 0.5)`), so the tree does not ignore the rare class.
 
-knn_spec <- nearest_neighbor(neighbors = tune(), weight_func = "triangular") |>
-  set_engine("kknn") |>
-  set_mode("classification")
+**5. K-nearest neighbours (KNN):** Predicts from the most similar firms | I tune the number of neighbours.
 
-rec_pca <- rec_base |>
-  step_pca(all_of(cont_vars), num_comp = tune())
-
-wf_log    <- workflow() |> add_recipe(rec_base) |> add_model(log_spec)
-wf_logpca <- workflow() |> add_recipe(rec_pca)  |> add_model(log_spec)
-wf_en     <- workflow() |> add_recipe(rec_base) |> add_model(en_spec)
-wf_tree   <- workflow() |> add_recipe(rec_base) |> add_model(tree_spec)
-wf_knn    <- workflow() |> add_recipe(rec_base) |> add_model(knn_spec)
-```
+The model functions are in the chunk above (`fit_logit`, `fit_logit_pca`, `fit_enet`, `fit_tree`, `fit_knn`). Each one fits on a training set and returns the predicted **probability of a controversy** for new firms.
 
 ### Fitting and tuning with cross-validation
 
 ```{r model-tune}
-set.seed(2026)
-log_res <- fit_resamples(wf_log, resamples = folds, metrics = cv_metrics, control = ctrl_res)
+res_log <- cv_grid(fit_logit, tibble(dummy = 1))
 
-set.seed(2026)
-logpca_res <- tune_grid(wf_logpca, resamples = folds,
-                        grid = tibble(num_comp = c(3, 5, 8, 10, 12, 15)),
-                        metrics = cv_metrics, control = ctrl_tune)
+res_pca <- cv_grid(fit_logit_pca, tibble(num_comp = c(3, 5, 8, 10, 12, 15)))
 
-en_grid <- grid_regular(penalty(range = c(-3.5, -1.5)), mixture(range = c(0, 1)), levels = c(10, 3))
+# elastic net: for each alpha (0 = ridge, 1 = lasso) fit the whole penalty path at once
+lam_grid <- 10^seq(-0.5, -3, length.out = 20)          # decreasing path (glmnet needs to start from a large penalty)
+res_en <- map_dfr(c(0.25, 0.5, 1), function(a) {
+  per_fold <- map(1:5, function(f) {
+    d <- fold_data[[f]]
+    p <- fit_enet(d$tr, d$te, alpha = a, lambdas = lam_grid)
+    tibble(lambda = lam_grid, roc = apply(p, 2, auc_fn, y = d$te$env_contro), pr = apply(p, 2, ap_fn, y = d$te$env_contro))
+  }) |> bind_rows(.id = "fold")
+  per_fold |> group_by(lambda) |>
+    summarise(mean_roc_auc = mean(roc), se_roc_auc = sd(roc) / sqrt(5),
+              mean_pr_auc = mean(pr), se_pr_auc = sd(pr) / sqrt(5), .groups = "drop") |>
+    mutate(alpha = a, .before = 1)
+})
 
-set.seed(2026)
-en_res <- tune_grid(wf_en, resamples = folds, grid = en_grid,
-                    metrics = cv_metrics, control = ctrl_tune)
+tree_grid <- expand_grid(cp = 10^seq(-3, -1.2, length.out = 5), maxdepth = c(2, 4, 6, 8), minsplit = c(10, 60))
+res_tree <- cv_grid(fit_tree, tree_grid)
 
-tree_grid <- grid_regular(cost_complexity(range = c(-3, -1.2)),
-                          tree_depth(range = c(2, 8)),
-                          min_n(range = c(10, 60)),
-                          levels = c(5, 4, 2))
-set.seed(2026)
-tree_res <- tune_grid(wf_tree, resamples = folds, grid = tree_grid,
-                      metrics = cv_metrics, control = ctrl_tune)
+res_knn <- cv_grid(fit_knn, tibble(k = c(5, 11, 21, 41, 71, 101, 151)))
 
-set.seed(2026)
-knn_res <- tune_grid(wf_knn, resamples = folds,
-                     grid = tibble(neighbors = c(5, 11, 21, 41, 71, 101, 151)),
-                     metrics = cv_metrics, control = ctrl_tune)
+best_pca  <- slice_max(res_pca,  mean_roc_auc, n = 1, with_ties = FALSE)
+best_en   <- slice_max(res_en,   mean_roc_auc, n = 1, with_ties = FALSE)
+best_tree <- slice_max(res_tree, mean_roc_auc, n = 1, with_ties = FALSE)
+best_knn  <- slice_max(res_knn,  mean_roc_auc, n = 1, with_ties = FALSE)
 
-best_logpca <- select_best(logpca_res, metric = "roc_auc")
-best_en     <- select_best(en_res,     metric = "roc_auc")
-best_tree   <- select_best(tree_res,   metric = "roc_auc")
-best_knn    <- select_best(knn_res,    metric = "roc_auc")
-
-list(PCA = best_logpca, ElasticNet = best_en, Tree = best_tree, KNN = best_knn)
+list(PCA = best_pca, ElasticNet = best_en, Tree = best_tree, KNN = best_knn)
 ```
 
 ```{r tune-plots, fig.height=4.5}
-(autoplot(logpca_res, metric = "roc_auc") + labs(title = "Logistic + PCA: number of components")) |
-  (autoplot(knn_res, metric = "roc_auc") + labs(title = "KNN: number of neighbours"))
+p_pca <- ggplot(res_pca, aes(num_comp, mean_roc_auc)) + geom_line(colour = col_main) + geom_point(colour = col_main, size = 2.5) +
+  labs(title = "Logistic + PCA", x = "Number of components", y = "CV ROC AUC")
+p_knn <- ggplot(res_knn, aes(k, mean_roc_auc)) + geom_line(colour = col_main) + geom_point(colour = col_main, size = 2.5) +
+  labs(title = "KNN", x = "Number of neighbours (k)", y = "CV ROC AUC")
+p_en <- ggplot(res_en, aes(log10(lambda), mean_roc_auc, colour = factor(alpha))) + geom_line(linewidth = 1) +
+  scale_colour_manual(values = c("#1B6CA8", "#E07A1F", "#4daf4a")) +
+  labs(title = "Elastic-net logistic regression", x = "log10(penalty)", y = "CV ROC AUC", colour = "alpha\n(1 = lasso)")
+p_tree <- ggplot(res_tree, aes(log10(cp), mean_roc_auc, colour = factor(minsplit))) + geom_line() + geom_point() +
+  facet_wrap(~ paste("max depth =", maxdepth), nrow = 1) +
+  labs(title = "Decision tree", x = "log10(complexity parameter cp)", y = "CV ROC AUC", colour = "min. split")
+
+wrap_plots(p_pca, p_knn, nrow = 1)
+p_en
+p_tree
 ```
 
-```{r tune-plot-en, fig.height=4.5}
-autoplot(en_res, metric = "roc_auc") + labs(title = "Elastic-net logistic regression: penalty and mixture (ROC AUC)")
-```
-
-```{r tune-plot-tree, fig.height=5}
-autoplot(tree_res, metric = "roc_auc") + labs(title = "Decision tree: tuning results (ROC AUC)")
-```
-
-**Interpretation:** the tuning plots show how performance changes with the settings. For KNN, very small *k* gives noisy predictions (high variance) and larger *k* smooths the predictions, which usually improves AUC until it flattens. For the PCA model, too few components throw away useful information, while more components approach the plain logistic model. For the elastic net, too little penalty behaves like the plain logistic regression (many noisy coefficients) and too much penalty shrinks every coefficient to zero, so performance peaks in between. For the tree, very deep trees with small leaves overfit, and the cross-validation picks a balance. I choose the setting with the best cross-validated ROC AUC for each model.
+**Interpretation:** the tuning plots show how performance changes with the settings. For KNN, very small *k* gives noisy predictions (high variance) and larger *k* smooths the predictions, which improves AUC until it flattens. For the PCA model, too few components throw away useful information, while more components approach the plain logistic model. For the elastic net, too much penalty shrinks every coefficient towards zero and too little behaves like the plain logistic regression (many noisy coefficients), so performance peaks in between, and a mixture closer to ridge/lasso is chosen by the cross-validation. For the tree, very deep trees with small leaves can overfit; I choose the setting with the best cross-validated ROC AUC for each model.
 
 ## 4.7 Comparing the models using cross-validation
 
 ```{r cv-compare}
-get_cv <- function(res, name, best = NULL) {
-  m <- collect_metrics(res)
-  if (!is.null(best)) m <- filter(m, .config == best$.config)
-  m |> select(.metric, mean, std_err) |> mutate(model = name)
-}
-
-cv_summary <- bind_rows(
-  get_cv(log_res,    "Logistic regression"),
-  get_cv(logpca_res, "Logistic regression + PCA", best_logpca),
-  get_cv(en_res,     "Elastic-net logistic regression", best_en),
-  get_cv(tree_res,   "Decision tree", best_tree),
-  get_cv(knn_res,    "KNN", best_knn)
-)
-
-cv_table <- cv_summary |>
-  pivot_wider(names_from = .metric, values_from = c(mean, std_err)) |>
+cv_table <- bind_rows(
+  res_log  |> mutate(model = "Logistic regression"),
+  best_pca |> mutate(model = "Logistic regression + PCA"),
+  best_en  |> mutate(model = "Elastic-net logistic regression"),
+  best_tree |> mutate(model = "Decision tree"),
+  best_knn |> mutate(model = "KNN")
+) |>
+  select(model, mean_roc_auc, se_roc_auc, mean_pr_auc, se_pr_auc) |>
   arrange(desc(mean_roc_auc))
 
-cv_table |> kable(digits = 3, caption = "Cross-validated performance (5 folds, training data)")
+kable(cv_table, digits = 3, caption = "Cross-validated performance (5 folds, training data)")
 
-ggplot(cv_summary, aes(x = mean, y = reorder(model, mean), colour = .metric)) +
-  geom_pointrange(aes(xmin = mean - std_err, xmax = mean + std_err), position = position_dodge(width = 0.5)) +
+cv_summary <- cv_table |>
+  pivot_longer(-model, names_to = c(".value", "metric"), names_pattern = "(mean|se)_(.*)")
+
+ggplot(cv_summary, aes(x = mean, y = reorder(model, mean), colour = metric)) +
+  geom_pointrange(aes(xmin = mean - se, xmax = mean + se), position = position_dodge(width = 0.5)) +
   scale_colour_manual(values = c(pr_auc = col_accent, roc_auc = col_main)) +
   labs(title = "Cross-validated ROC AUC and PR AUC by model",
        subtitle = "Points = mean across folds; bars = +/- 1 standard error", x = "Metric value", y = NULL, colour = NULL)
 ```
 
-```{r cv-curves, fig.height=5.5}
+```{r cv-curves, fig.height=6}
+fit_enet_best <- function(tr, te, alpha, lambda, ...) {      # one lambda taken from the fitted path
+  p <- fit_enet(tr, te, alpha, lam_grid)
+  p[, which.min(abs(log10(lam_grid) - log10(lambda)))]
+}
+
 oof_preds <- bind_rows(
-  "Logistic regression"       = collect_predictions(log_res),
-  "Logistic regression + PCA" = collect_predictions(logpca_res, parameters = best_logpca),
-  "Elastic-net logistic regression" = collect_predictions(en_res, parameters = best_en),
-  "Decision tree"             = collect_predictions(tree_res,   parameters = best_tree),
-  "KNN"                       = collect_predictions(knn_res,    parameters = best_knn),
-  .id = "model"
-)
+  tibble(model = "Logistic regression",             .pred_Yes = oof_pred(fit_logit, list())),
+  tibble(model = "Logistic regression + PCA",       .pred_Yes = oof_pred(fit_logit_pca, list(num_comp = best_pca$num_comp))),
+  tibble(model = "Elastic-net logistic regression", .pred_Yes = oof_pred(fit_enet_best, list(alpha = best_en$alpha, lambda = best_en$lambda))),
+  tibble(model = "Decision tree",                   .pred_Yes = oof_pred(fit_tree, list(cp = best_tree$cp, maxdepth = best_tree$maxdepth, minsplit = best_tree$minsplit))),
+  tibble(model = "KNN",                             .pred_Yes = oof_pred(fit_knn, list(k = best_knn$k)))
+) |> mutate(env_contro = rep(train$env_contro, 5))
 
-roc_plot <- oof_preds |> group_by(model) |> roc_curve(truth = env_contro, .pred_Yes) |> autoplot() +
-  labs(title = "ROC curves (out-of-fold predictions)")
-pr_plot  <- oof_preds |> group_by(model) |> pr_curve(truth = env_contro, .pred_Yes) |> autoplot() +
-  labs(title = "Precision-recall curves (out-of-fold)")
+roc_points <- function(y, p) {
+  r <- pROC::roc(y01(y), p, levels = c(0, 1), direction = "<", quiet = TRUE)
+  tibble(fpr = 1 - r$specificities, tpr = r$sensitivities)
+}
+pr_points <- function(y, p) {
+  o <- order(p, decreasing = TRUE); yy <- y01(y)[o]
+  tibble(recall = cumsum(yy) / sum(yy), precision = cumsum(yy) / seq_along(yy))
+}
 
-roc_plot | pr_plot
-```
+roc_df <- oof_preds |> group_by(model) |> group_modify(~ roc_points(.x$env_contro, .x$.pred_Yes)) |> ungroup()
+pr_df  <- oof_preds |> group_by(model) |> group_modify(~ pr_points(.x$env_contro, .x$.pred_Yes)) |> ungroup()
 
-```{r cv-text, echo=FALSE}
-best_name <- cv_table$model[1]
+roc_plot <- ggplot(roc_df, aes(fpr, tpr, colour = model)) + geom_line(linewidth = 0.9) +
+  geom_abline(linetype = "dashed", colour = "grey50") + coord_equal() +
+  labs(title = "ROC curves (out-of-fold predictions)", x = "1 - specificity", y = "Sensitivity", colour = NULL) +
+  theme(legend.position = "bottom", legend.direction = "vertical")
+pr_plot <- ggplot(pr_df, aes(recall, precision, colour = model)) + geom_line(linewidth = 0.9) +
+  geom_hline(yintercept = mean(train$env_contro == "Yes"), linetype = "dashed", colour = "grey50") +
+  labs(title = "Precision-recall curves (out-of-fold)", subtitle = "Dashed line = share of positives", x = "Recall", y = "Precision", colour = NULL) +
+  theme(legend.position = "bottom", legend.direction = "vertical")
+
+wrap_plots(roc_plot, pr_plot, nrow = 1, guides = "collect") & theme(legend.position = "bottom")
+
+best_name   <- cv_table$model[1]
 best_cv_auc <- cv_table$mean_roc_auc[1]
 ```
 
-**Interpretation:** the best model in cross-validation is **`r best_name`** with a ROC AUC of about `r round(best_cv_auc, 3)`. An AUC of 0.5 is random guessing and 1.0 is perfect, so my values of roughly 0.65 to 0.70 mean the models are better than chance but only modestly, which is consistent with the heavy overlap I saw in the PCA plot. The penalised (elastic-net) logistic regression is slightly ahead, which makes sense because it shrinks the many noisy and correlated coefficients that hurt the plain logistic regression. The PR AUC values are low in absolute terms because only 2.8% of firms are positive (a random model would score about 0.03), so I judge them against that baseline and not against 1. The standard-error bars show that differences between the closest models are small relative to fold-to-fold noise, so I should not claim that the ranking is certain. One oddity: the decision tree has the highest PR AUC but the lowest ROC AUC. The selected tree is very shallow, so it gives only a few distinct probabilities and its precision-recall curve is not very reliable. I therefore select models using ROC AUC and treat the tree's PR AUC with caution. Warnings such as "fitted probabilities numerically 0 or 1" in the logistic regression come from a few rare categories that perfectly predict the outcome in some folds; they are a sign of overfitting by the plain model, which is another reason the penalised version is preferred.
+```{r cv-text, echo=FALSE}
+tree_row <- filter(cv_table, model == "Decision tree")
+```
+
+**Interpretation:** the best model in cross-validation is **`r best_name`** with a ROC AUC of about `r round(best_cv_auc, 3)`. An AUC of 0.5 is random guessing and 1.0 is perfect, so my values of roughly 0.65 to 0.72 mean the models are better than chance but only modestly, which is consistent with the heavy overlap I saw in the PCA plot. The penalised (elastic-net) logistic regression is ahead, which makes sense because it shrinks the many noisy and correlated coefficients that hurt the plain logistic regression. However, its lead over plain logistic regression, logistic regression with PCA and KNN is small compared with the standard errors, so I should not claim the ranking among these four is certain. The **decision tree is clearly the weakest** (AUC about `r round(tree_row$mean_roc_auc, 2)`): a single tree is unstable and this data has weak, noisy signals. The PR AUC values are low in absolute terms because only 2.8% of firms are positive (a random model would score about 0.03), so I judge them against that baseline and not against 1; the best models are roughly four to five times better than random on this measure.
 
 ## 4.8 Choosing the decision threshold (using the cost of errors)
 
-A classification model gives a **probability**, and I must choose a cut-off above which a firm is flagged. The default cut-off of 0.5 is far too high here, because predicted probabilities are small when the event is rare. Since false positives are cheap and false negatives are costly, I choose the cut-off that maximises the **F2 score** on the **out-of-fold training predictions** (not on the test set). I also show some alternative operating points.
+A classification model gives a **probability**, and I must choose a cut-off above which a firm is flagged. The default cut-off of 0.5 is far too high here, because predicted probabilities are small when the event is rare. Since false positives are cheap and false negatives are costly, I choose the cut-off that maximises the **F2 score** on the **out-of-fold training predictions** (not on the test set). F2 is the F-score that treats recall as twice as important as precision. I also show some alternative operating points.
 
 ```{r threshold}
-oof_best <- oof_preds |> filter(model == best_name)
-
-eval_threshold <- function(t, dat) {
-  pred <- factor(if_else(dat$.pred_Yes >= t, "Yes", "No"), levels = c("Yes", "No"))
-  tibble(threshold = t,
-         sensitivity = sens_vec(dat$env_contro, pred),
-         specificity = spec_vec(dat$env_contro, pred),
-         precision   = suppressWarnings(precision_vec(dat$env_contro, pred)),
-         f2          = suppressWarnings(f_meas_vec(dat$env_contro, pred, beta = 2)),
-         flagged     = mean(pred == "Yes"))
+conf_counts <- function(truth, pred_class) {
+  c(TP = sum(truth == "Yes" & pred_class == "Yes"), FN = sum(truth == "Yes" & pred_class == "No"),
+    FP = sum(truth == "No"  & pred_class == "Yes"), TN = sum(truth == "No"  & pred_class == "No"))
+}
+class_metrics <- function(truth, pred_class) {
+  n <- conf_counts(truth, pred_class)
+  sens <- n["TP"] / (n["TP"] + n["FN"]); spec <- n["TN"] / (n["TN"] + n["FP"])
+  prec <- if (n["TP"] + n["FP"] > 0) n["TP"] / (n["TP"] + n["FP"]) else 0
+  tibble(.metric  = c("sens", "spec", "precision", "accuracy", "bal_accuracy", "f2"),
+         .estimate = c(sens, spec, prec, (n["TP"] + n["TN"]) / sum(n), (sens + spec) / 2,
+                       5 * n["TP"] / (5 * n["TP"] + 4 * n["FN"] + n["FP"])) |> unname())
 }
 
-cand_thresholds <- unique(quantile(oof_best$.pred_Yes, probs = seq(0.30, 0.995, by = 0.005)))
-thr_tbl <- map_dfr(cand_thresholds, eval_threshold, dat = oof_best) |>
-  mutate(f2 = replace_na(f2, 0), precision = replace_na(precision, 0))
+oof_best <- filter(oof_preds, model == best_name)
 
-best_thr <- thr_tbl |> slice_max(f2, n = 1, with_ties = FALSE)
+eval_threshold <- function(t, dat) {
+  pred <- if_else(dat$.pred_Yes >= t, "Yes", "No")
+  m <- class_metrics(dat$env_contro, pred)
+  tibble(threshold = t, sensitivity = m$.estimate[1], specificity = m$.estimate[2],
+         precision = m$.estimate[3], f2 = m$.estimate[6], flagged = mean(pred == "Yes"))
+}
+
+cand_thresholds <- unique(quantile(oof_best$.pred_Yes, probs = seq(0.05, 0.995, by = 0.005)))
+thr_tbl  <- map_dfr(cand_thresholds, eval_threshold, dat = oof_best)
+best_thr <- slice_max(thr_tbl, f2, n = 1, with_ties = FALSE)
 
 thr_tbl |>
   pivot_longer(c(sensitivity, specificity, precision, f2), names_to = "metric", values_to = "value") |>
@@ -1742,91 +1909,103 @@ bind_rows(best_thr |> mutate(target_recall = NA_real_, choice = "Best F2 (my cho
   kable(caption = "Operating points on out-of-fold training predictions")
 ```
 
-**Interpretation:** the plot shows the classic trade-off: lowering the threshold catches more controversial firms (higher sensitivity) but flags many more firms (lower precision and specificity). The table translates this into workload. For example, to catch a given share of risky firms the experts must review the percentage of firms shown in the "Firms flagged" column. I use the best-F2 threshold as my default recommendation because it reflects the stated cost structure (missing a risky firm is worse than reviewing a safe one). If the experts have less capacity, the manager can pick a higher threshold from the table; if the firm wants to be extra careful, a lower one.
+**Interpretation:** the plot shows the classic trade-off: lowering the threshold catches more controversial firms (higher sensitivity) but flags many more firms (lower precision and specificity). The table translates this into workload. For example, to catch a given share of risky firms the experts must review the percentage of firms shown in the "Firms flagged" column. Because the model is only moderately accurate, catching most risky firms needs a very low threshold and a large review workload (catching about 80% of risky firms means reviewing more than half of all firms). I use the best-F2 threshold as my default recommendation because it reflects the stated cost structure (missing a risky firm is worse than reviewing a safe one) while keeping the review list short. If the experts have more capacity, the manager can pick a lower threshold from the table; if capacity is tight, a higher one.
 
 ## 4.9 Final evaluation on the test set
 
 Now I refit the best model on the **whole training set**, predict on the **test set** (the first time it is used), and apply the threshold I chose in 4.8. This gives an honest estimate of how the model would work on new firms.
 
 ```{r final-fit}
-final_wfs <- list(
-  "Logistic regression"       = wf_log,
-  "Logistic regression + PCA" = finalize_workflow(wf_logpca, best_logpca),
-  "Elastic-net logistic regression" = finalize_workflow(wf_en, best_en),
-  "Decision tree"             = finalize_workflow(wf_tree, best_tree),
-  "KNN"                       = finalize_workflow(wf_knn, best_knn)
-)
+predict_final <- function(name, tr, te) {
+  switch(name,
+    "Logistic regression"             = fit_logit(tr, te),
+    "Logistic regression + PCA"       = fit_logit_pca(tr, te, num_comp = best_pca$num_comp),
+    "Elastic-net logistic regression" = fit_enet_best(tr, te, best_en$alpha, best_en$lambda),
+    "Decision tree"                   = fit_tree(tr, te, best_tree$cp, best_tree$maxdepth, best_tree$minsplit),
+    "KNN"                             = fit_knn(tr, te, best_knn$k))
+}
 
-final_fit  <- last_fit(final_wfs[[best_name]], split = firm_split, metrics = metric_set(roc_auc, pr_auc))
-test_pred  <- collect_predictions(final_fit) |>
-  mutate(pred_class = factor(if_else(.pred_Yes >= best_thr$threshold, "Yes", "No"), levels = c("Yes", "No")),
+test_pred <- tibble(env_contro = test$env_contro,
+                    .pred_Yes  = predict_final(best_name, train_baked, test_baked)) |>
+  mutate(pred_class   = factor(if_else(.pred_Yes >= best_thr$threshold, "Yes", "No"), levels = c("Yes", "No")),
          pred_default = factor(if_else(.pred_Yes >= 0.5, "Yes", "No"), levels = c("Yes", "No")))
 
-collect_metrics(final_fit) |> select(.metric, .estimate) |> kable(digits = 3, caption = paste("Test-set AUC for the final model:", best_name))
+tibble(metric = c("roc_auc", "pr_auc"),
+       estimate = c(auc_fn(test_pred$env_contro, test_pred$.pred_Yes), ap_fn(test_pred$env_contro, test_pred$.pred_Yes))) |>
+  kable(digits = 3, caption = paste("Test-set AUC for the final model:", best_name))
 ```
 
 ```{r final-metrics}
-class_metrics <- metric_set(sens, yardstick::spec, precision, accuracy, bal_accuracy)   # yardstick::spec because readr also has a spec()
+tm     <- class_metrics(test_pred$env_contro, test_pred$pred_class)
+tm_def <- class_metrics(test_pred$env_contro, test_pred$pred_default)
 
-bind_rows(
-  class_metrics(test_pred, truth = env_contro, estimate = pred_class) |> mutate(rule = "My threshold"),
-  class_metrics(test_pred, truth = env_contro, estimate = pred_default) |> mutate(rule = "Default 0.5")
-) |>
-  bind_rows(
-    tibble(.metric = "f2", .estimator = "binary", .estimate = f_meas_vec(test_pred$env_contro, test_pred$pred_class, beta = 2), rule = "My threshold"),
-    tibble(.metric = "f2", .estimator = "binary", .estimate = suppressWarnings(f_meas_vec(test_pred$env_contro, test_pred$pred_default, beta = 2)), rule = "Default 0.5")
-  ) |>
-  select(rule, .metric, .estimate) |>
-  pivot_wider(names_from = rule, values_from = .estimate) |>
+tibble(metric = tm$.metric, `My threshold` = tm$.estimate, `Default 0.5` = tm_def$.estimate) |>
   kable(digits = 3, caption = "Test-set performance: my threshold vs the default 0.5 cut-off")
 ```
 
 ```{r final-plots, fig.height=5}
-cm_plot <- conf_mat(test_pred, truth = env_contro, estimate = pred_class) |>
-  autoplot(type = "heatmap") + labs(title = "Confusion matrix (test set, my threshold)")
+cm <- table(Truth = test_pred$env_contro, Predicted = test_pred$pred_class)
 
-roc_test <- roc_curve(test_pred, truth = env_contro, .pred_Yes) |>
-  autoplot() + labs(title = "ROC curve (test set)")
+cm_plot <- as.data.frame(cm) |>
+  ggplot(aes(Predicted, Truth, fill = Freq)) +
+  geom_tile(colour = "white") + geom_text(aes(label = Freq), size = 6) +
+  scale_fill_gradient(low = "white", high = col_main, guide = "none") +
+  scale_y_discrete(limits = rev) +
+  labs(title = "Confusion matrix (test set, my threshold)")
 
-cm_plot | roc_test
+roc_test <- roc_points(test_pred$env_contro, test_pred$.pred_Yes) |>
+  ggplot(aes(fpr, tpr)) + geom_line(colour = col_main, linewidth = 1) +
+  geom_abline(linetype = "dashed", colour = "grey50") + coord_equal() +
+  labs(title = "ROC curve (test set)", x = "1 - specificity", y = "Sensitivity")
+
+wrap_plots(cm_plot, roc_test, nrow = 1)
 ```
 
 ```{r final-gain, fig.height=5}
-gain_curve(test_pred, truth = env_contro, .pred_Yes) |>
-  autoplot() + labs(title = "Gain curve: how many risky firms do we find if we review the top-ranked firms first?")
+gain_df <- test_pred |>
+  arrange(desc(.pred_Yes)) |>
+  mutate(pct_tested = row_number() / n(), pct_found = cumsum(env_contro == "Yes") / sum(env_contro == "Yes"))
+
+ggplot(gain_df, aes(pct_tested, pct_found)) +
+  geom_line(colour = col_main, linewidth = 1) +
+  geom_abline(linetype = "dashed", colour = "grey50") +
+  scale_x_continuous(labels = percent) + scale_y_continuous(labels = percent) +
+  labs(title = "Gain curve: how many risky firms do we find if we review the top-ranked firms first?",
+       x = "Share of firms reviewed (highest predicted risk first)", y = "Share of controversial firms found")
 ```
 
 ```{r final-bootstrap}
 set.seed(2026)
-boots <- bootstraps(test_pred, times = 500)
-auc_boot <- map_dbl(boots$splits, ~ roc_auc(analysis(.x), truth = env_contro, .pred_Yes)$.estimate)
-sens_boot <- map_dbl(boots$splits, ~ sens(analysis(.x), truth = env_contro, estimate = pred_class)$.estimate)
+boot_stats <- map_dfr(1:500, function(b) {
+  i <- sample(nrow(test_pred), replace = TRUE)
+  d <- test_pred[i, ]
+  tibble(auc = auc_fn(d$env_contro, d$.pred_Yes),
+         sens = class_metrics(d$env_contro, d$pred_class)$.estimate[1])
+})
 
 tibble(metric = c("ROC AUC", "Sensitivity"),
-       estimate = c(roc_auc(test_pred, truth = env_contro, .pred_Yes)$.estimate,
-                    sens(test_pred, truth = env_contro, estimate = pred_class)$.estimate),
-       lower_95 = c(quantile(auc_boot, 0.025), quantile(sens_boot, 0.025)),
-       upper_95 = c(quantile(auc_boot, 0.975), quantile(sens_boot, 0.975))) |>
+       estimate = c(auc_fn(test_pred$env_contro, test_pred$.pred_Yes), tm$.estimate[1]),
+       lower_95 = c(quantile(boot_stats$auc, 0.025), quantile(boot_stats$sens, 0.025)),
+       upper_95 = c(quantile(boot_stats$auc, 0.975), quantile(boot_stats$sens, 0.975))) |>
   kable(digits = 3, caption = "Bootstrap 95% confidence intervals on the test set (500 resamples)")
 ```
 
 ```{r final-text, echo=FALSE}
-tm <- class_metrics(test_pred, truth = env_contro, estimate = pred_class)
-tm_def <- class_metrics(test_pred, truth = env_contro, estimate = pred_default)
 get_m <- function(d, m) d$.estimate[d$.metric == m]
-test_auc <- roc_auc(test_pred, truth = env_contro, .pred_Yes)$.estimate
+test_auc   <- auc_fn(test_pred$env_contro, test_pred$.pred_Yes)
 n_pos_test <- sum(test_pred$env_contro == "Yes")
-cm <- table(Truth = test_pred$env_contro, Predicted = test_pred$pred_class)
+auc_boot   <- boot_stats$auc
+sens_boot  <- boot_stats$sens
 ```
 
 **Interpretation of the test results:**
 
-* The final model is **`r best_name`**. On the unseen test set its ROC AUC is **`r round(test_auc, 3)`**, compared with a cross-validated value of about `r round(best_cv_auc, 3)`. The test value is somewhat lower. A modest drop is expected, partly because the best of five models was chosen on the training folds (which makes the cross-validated score slightly optimistic) and partly because the test set has very few positives; the bootstrap interval below shows that the two numbers are statistically compatible.
-* With my threshold of **`r round(best_thr$threshold, 3)`**, the model catches **`r percent(get_m(tm, "sens"), accuracy = 1)`** of the `r n_pos_test` controversial firms in the test set (sensitivity), at the cost of a specificity of `r percent(get_m(tm, "spec"), accuracy = 1)`. The confusion matrix shows `r cm["Yes", "Yes"]` true positives, `r cm["No", "Yes"]` false positives and `r cm["Yes", "No"]` missed firms (false negatives).
-* Precision is only `r percent(get_m(tm, "precision"), accuracy = 1)`, meaning most flagged firms are *not* controversial. In this task that is acceptable (the scenario says false positives are low cost) but experts should know that most flagged firms will be false alarms.
+* The final model is **`r best_name`**. On the unseen test set its ROC AUC is **`r round(test_auc, 3)`**, compared with a cross-validated value of about `r round(best_cv_auc, 3)`. The two are close, so I do not see strong signs of overfitting, but the test set has few positives, so I still treat the number as approximate.
+* With my threshold of **`r round(best_thr$threshold, 3)`**, the model catches **`r percent(get_m(tm, "sens"), accuracy = 1)`** of the `r n_pos_test` controversial firms in the test set (sensitivity), with a specificity of `r percent(get_m(tm, "spec"), accuracy = 1)`. The confusion matrix shows `r cm["Yes", "Yes"]` true positives, `r cm["No", "Yes"]` false positives and `r cm["Yes", "No"]` missed firms (false negatives).
+* Precision is only `r percent(get_m(tm, "precision"), accuracy = 1)`, meaning most flagged firms are *not* controversial. In this task that is acceptable (the scenario says false positives are low cost) but experts should know that most flagged firms will be false alarms. Still, this precision is several times higher than the 2.8% base rate, which shows the model concentrates risk.
 * **Accuracy looks worse** (`r percent(get_m(tm, "accuracy"), accuracy = 1)`) than for the default 0.5 rule (`r percent(get_m(tm_def, "accuracy"), accuracy = 1)`), but that is misleading: the default rule is accurate only because it almost never flags a firm. Its sensitivity is just `r percent(get_m(tm_def, "sens"), accuracy = 1)`, so it would miss nearly every risky firm. This is the accuracy paradox for imbalanced data.
 * The **gain curve** shows how much better than random the ranking is: the further the curve is above the diagonal, the more controversial firms are found early when experts review firms in order of predicted risk.
-* The **bootstrap confidence intervals** are wide because the test set contains only about `r n_pos_test` positives. I should therefore present performance as a *range* and not as a precise number.
+* The **bootstrap confidence intervals** are wide because the test set contains only about `r n_pos_test` positives. I should therefore present performance as a *range* (for example AUC between about `r round(quantile(auc_boot, 0.025), 2)` and `r round(quantile(auc_boot, 0.975), 2)`) and not as a precise number.
 
 ## 4.10 What drives the predictions? (model interpretation)
 
@@ -1834,13 +2013,15 @@ I fit the logistic regression and the decision tree on the training data to see 
 
 ### Logistic regression: odds ratios
 
-The variables are standardised, so each odds ratio shows how the odds of a controversy change when the variable increases by **one standard deviation** (of its transformed version). A value above 1 means higher risk; below 1 means lower risk.
+The continuous variables are standardised, so each odds ratio shows how the odds of a controversy change when the variable increases by **one standard deviation** (of its transformed version). A value above 1 means higher risk; below 1 means lower risk. The confidence intervals here are Wald intervals (estimate plus or minus 1.96 standard errors).
 
 ```{r interpret-logit, fig.height=7}
-fit_log <- fit(wf_log, data = train)
-
-or_tbl <- extract_fit_parsnip(fit_log) |>
-  tidy(exponentiate = TRUE, conf.int = TRUE) |>
+glm_fit <- suppressWarnings(glm(y ~ ., data = cbind(x_of(train_baked), y = y01(train_baked$env_contro)), family = binomial))
+cf <- summary(glm_fit)$coefficients
+or_tbl <- tibble(term = rownames(cf), estimate = exp(cf[, "Estimate"]),
+                 conf.low = exp(cf[, "Estimate"] - 1.96 * cf[, "Std. Error"]),
+                 conf.high = exp(cf[, "Estimate"] + 1.96 * cf[, "Std. Error"]),
+                 p.value = cf[, "Pr(>|z|)"]) |>
   filter(term != "(Intercept)", !is.na(estimate))
 
 or_tbl |>
@@ -1858,25 +2039,33 @@ or_tbl |> arrange(p.value) |> head(10) |>
   kable(digits = 3, caption = "Ten most significant terms in the logistic regression")
 ```
 
-**Interpretation:** the terms with the smallest p-values are the variables that are most reliably associated with controversy risk after controlling for the others. In my output the most significant terms are size, cost and emission variables (for example revenue, cost of revenue and Scope 2 and Scope 3 emissions). Some have odds ratios above 1 and some below 1, which looks contradictory: revenue and Scope 3 emissions appear to *lower* the odds while cost of revenue and Scope 2 emissions *raise* them. This is the multicollinearity problem I saw in the correlation plot: these variables move together, so the model uses differences between them, and their individual coefficients are unstable and should not be read one by one. I read them together as "size and emissions matter" and I use the confidence intervals to see how certain each effect is (if the interval crosses 1, the effect is not statistically clear). A headquarters in China also has a high odds ratio, but the number of firms behind it is small, so I treat it with caution.
+**Interpretation:** in my output the most significant terms are size, cost and emission variables (for example revenue, cost of revenue and Scope 2 and Scope 3 emissions), together with a few industries. Some size and cost variables have odds ratios above 1 and some below 1, which looks contradictory: for example revenue appears to *raise* the odds while cost of revenue and Scope 2 emissions appear to *lower* them. This is the multicollinearity problem I saw in the correlation plot: these variables move together, so the model uses differences between them, and their individual coefficients are unstable and should not be read one by one. I read them together as "size and emissions matter", and I use the confidence intervals to see how certain each effect is (if the interval crosses 1, the effect is not statistically clear). Industries such as real estate (REITs) and electric utilities have much lower odds than the reference industry, which fits the exploratory result that resource-heavy sectors are riskier than service or property sectors. Industry dummies are compared with the first (alphabetical) industry, which is the baseline.
 
 ### Decision tree: rules and variable importance
 
 ```{r interpret-tree, fig.height=7}
-fit_tree <- fit(finalize_workflow(wf_tree, best_tree), data = train)
-tree_engine <- extract_fit_engine(fit_tree)
+tree_engine <- rpart(env_contro ~ ., data = train_baked, method = "class", parms = list(prior = c(0.5, 0.5)),
+                     control = rpart.control(cp = best_tree$cp, maxdepth = best_tree$maxdepth,
+                                             minsplit = best_tree$minsplit, xval = 0))
 
-if (nrow(tree_engine$frame) > 1) {
-  rpart.plot(tree_engine, type = 4, extra = 104, under = TRUE, roundint = FALSE, box.palette = "BuOr",
-             main = "Decision tree for environmental controversy (probability of Yes / No and % of firms)")
+# the best tree from tuning is deep (hard to read), so I draw a simplified tree with the same settings but only 3 levels
+tree_simple <- rpart(env_contro ~ ., data = train_baked, method = "class", parms = list(prior = c(0.5, 0.5)),
+                     control = rpart.control(cp = 0.01, maxdepth = 3, minsplit = 60, xval = 0))
+
+if (nrow(tree_simple$frame) > 1) {
+  if (requireNamespace("rpart.plot", quietly = TRUE)) {
+    rpart.plot::rpart.plot(tree_simple, type = 4, extra = 104, under = TRUE, roundint = FALSE, box.palette = "BuOr",
+                           main = "Decision tree for environmental controversy (probability of Yes / No and % of firms)")
+  } else {
+    plot(tree_simple, uniform = TRUE, margin = 0.1); text(tree_simple, use.n = TRUE, cex = 0.7)
+  }
 } else {
-  cat("The selected tree has no splits (a single node), so there is nothing to plot.\n")
+  cat("The simplified tree has no splits (a single node), so there is nothing to plot.\n")
 }
 ```
 
 ```{r interpret-tree-imp, fig.height=5}
 imp <- tree_engine$variable.importance
-
 if (!is.null(imp)) {
   tibble(variable = names(imp), importance = as.numeric(imp)) |>
     slice_max(importance, n = 12) |>
@@ -1886,7 +2075,7 @@ if (!is.null(imp)) {
 }
 ```
 
-**Interpretation:** the tree shows simple "if-then" rules. The first split is the variable that best separates controversial from non-controversial firms; boxes with a high share of "Yes" are the high-risk segments that experts should look at first. The variable importance chart summarises which predictors the tree uses most. In my run the selected tree is very shallow (only a couple of splits) and the most important variables are the size and cost variables (capital expenditure, revenue and cost of revenue), which agrees with the logistic regression and the clustering result: **size drives most of the predictable risk**. A shallow tree is easy to explain, but a single tree is less stable and less accurate than the other models here, so I use it for explanation and not as the final predictor.
+**Interpretation:** the tree shows simple "if-then" rules. For readability I draw a simplified three-level tree: the first split is the variable that best separates controversial from non-controversial firms, and boxes with a high share of "Yes" are the high-risk segments that experts should look at first. The variable importance chart comes from the full tuned tree. In my run the most important variables are the size and cost variables (capital expenditure, revenue, cost of revenue and market capitalisation), which agrees with the logistic regression and the clustering result: **size drives most of the predictable risk**. A single tree is easy to explain, but it is less stable and less accurate than the other models here, so I use it for explanation and not as the final predictor.
 
 ## 4.11 Conclusions and recommendations for Part 4
 
