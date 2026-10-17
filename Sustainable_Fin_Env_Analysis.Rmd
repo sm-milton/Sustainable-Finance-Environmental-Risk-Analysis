@@ -140,9 +140,7 @@ cat("Rows:", nrow(firms_raw), "| columns:", ncol(firms_raw), "\n")
 cat("Exact duplicate rows:", sum(duplicated(firms_raw)), "\n")
 ```
 
-**Findings:** There are **4 exact duplicate rows** (each of these four cities, Busan, Gwangju, Chapel Hill and Sanggau, appears twice with every field identical and no project details). I removed them, so the working table has **`r nrow(projects)` rows** (from `r nrow(projects_raw)`). 
-
-A further `r nrow(near_dup)` city-and-description pairs still repeat, but they differ in at least one column (for example a different funding model or total cost), so they could be genuinely separate or updated entries. I kept them because they are not exact duplicates and they affect only 3 of `r nrow(projects)` rows.
+**Findings:** There are **4 exact duplicate rows** (each of these four cities, Busan, Gwangju, Chapel Hill and Sanggau, appears twice with every field identical and no project details). I removed them, so the working table has `r nrow(projects_raw)-4` rows (from `r nrow(projects_raw)`). 
 
 There is no duplicate rows in firms data.
 
@@ -433,7 +431,7 @@ wrap_plots(wrap_plots(g1, g2, nrow = 1), g3, ncol = 1)
 **Findings:** the top three individual hazards are **extreme heat, urban flooding and drought**. When I group hazards into families, **flooding and heavy rain** is the broadest problem (about nine in ten cities mention at least one flood-type hazard), followed by **heat** (about three in four cities) and **drought / water scarcity** (a little over half). This tells me that the climate risks to communities are mainly about **too much water, too little water and too much heat**. These are the threats that infrastructure such as drainage, wastewater, waste and water systems, and cooling or green space projects must address.
 
 ```{r}
-rm(top10_tbl, h1, h2, g1, g2, g3, p1, p2, p3, valid_hazards, n_cities_with_text)
+rm(top10_tbl, h1, h2, g1, g2, g3, p1, p2, p3, valid_hazards)
 graphics.off()
 ```
 
@@ -909,7 +907,7 @@ fam1 <- family_counts |> slice_head(n = 1)
 6. **Limitations.** The data are self-reported by cities that chose to disclose, regions such as India, Japan and China have very few cities, and hazard names were extracted from free text.
 
 ```{r}
-rm(cities, city_clusters, cluster_hazard, fam1, family_counts, hazard_counts, hazards, hazards_per_city, km_city, pca_city, pca_data, scores, top3)
+rm(n_cities_with_text, cities, city_clusters, cluster_hazard, fam1, family_counts, hazard_counts, hazards, hazards_per_city, km_city, pca_city, pca_data, scores, top3)
 graphics.off()
 ```
 
@@ -1204,7 +1202,7 @@ rm(aug, lm_df, lm_fit, lm_tidy, d1, d2)
 graphics.off()
 ```
 
-# Part 4: Predicting environmental controversy risk (60 marks)
+# Part 4: Predicting environmental controversy risk
 
 ## 4.1 Understanding the business problem
 
