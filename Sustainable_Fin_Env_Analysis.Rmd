@@ -18,7 +18,6 @@ editor_options:
 
 ```{r}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
-set.seed(123)
 ```
 
 # Introduction
@@ -36,26 +35,12 @@ I am an entry-level analyst at an investment firm that finances **sustainable in
 
 ```{r packages}
 # Install and load packages
-
 if(!require("pacman"))install.packages("pacman")
 
 pacman::p_load(tidyverse, tidytext, knitr, scales, caret, pROC, MLmetrics, ranger, glmnet, rpart, patchwork, topicmodels, slam, corrplot, factoextra, tidymodels, rpart.plot, kknn, glmnet)
+```
 
-# tidyverse : dplyr, tidyr, ggplot2, stringr, forcats, readr
-# tidytext  : tokenising text
-# knitr     : kable() tables
-# scales    : label formatting in plots
-# caret     : model training, cross-validation
-# pROC      : ROC / AUC
-# MLmetrics : used by caret::prSummary (precision-recall AUC)
-# ranger    : fast random forest
-# glmnet    : elastic-net logistic regression
-# rpart     : decision tree
-
-# reproducibility: every random step below uses this seed
-
-set.seed(123)       
-
+```{r defining-global-theme}
 # one theme and one colour palette for the whole report (consistency helps storytelling)
 
 theme_set(theme_minimal(base_size = 12) +
@@ -64,6 +49,10 @@ theme_set(theme_minimal(base_size = 12) +
 col_main   <- "#1B6CA8"   # blue
 col_accent <- "#E07A1F"   # orange
 col_grey   <- "grey65"
+```
+
+```{r}
+set.seed(123)
 ```
 
 # Data Import and Initial Inspection
@@ -2128,6 +2117,23 @@ n_flagged_test <- sum(test_pred$pred_class == "Yes")
 **3. Ranked investment opportunities:** 31 waste-management projects from cities with confirmed business collaboration and loan / PPP funding models, ranked by investment cost.
 
 **4. Environmental controversy model:** A cross-validated, threshold-tuned screening model with moderate discriminating power; best used to prioritise firms for expert review.
+
+```{r}
+# 1. Clear variables
+rm(list = ls())
+
+# 2. Clear plots
+if(!is.null(dev.list())) dev.off()
+
+# 3. Free up RAM
+gc()
+```
+
+# GenAI Declaration
+
+I used ChatGpt, Claude and Copilot AI as a supporting tool during this assignment. The tool was used for brainstorming, understanding and shortening R syntax, troubleshooting code, suggesting ways to structure the analysis, and improving explanations and writing.
+
+I used GenAI as a supporting tool. I checked the suggested R code against the assignment requirements and ran the code in R using the supplied dataset. I also inspected the data, outputs, statistical results, tables and visualizations myself and made the final decisions about data preparation, analysis and interpretation. Where GenAI suggestions were used, I verified that they were appropriate for the variables and statistical techniques covered in the course.
 
 # Session information
 
