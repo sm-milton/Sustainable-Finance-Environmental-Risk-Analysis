@@ -1,13 +1,13 @@
 ---
 title: "Individual Task 2: Sustainable Infrastructure and Responsible Investment Analysis"
 subtitle: "Individual Task 2 | Reproducible R Analysis"
-author: "Sheikh Mohammad Milton"
 date: "`r format(Sys.Date(), '%d %B %Y')`"
 output:
   html_document:
     toc: true
     toc_depth: 3
     number_sections: true
+    code_folding: hide
     df_print: paged
   pdf_document:
     toc: true
@@ -17,14 +17,14 @@ editor_options:
 ---
 
 ```{r}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
 
 # Introduction
 
 ## Business context
 
-I am an entry-level analyst at an investment firm that finances **sustainable infrastructure** and applies **responsible-investment** principles. My line manager asked for four pieces of work:
+I am an entry-level analyst at an investment firm that finances sustainable infrastructure and applies responsible-investment principles. My line manager asked for four pieces of work:
 
 1. Most common climate hazards affecting communities globally
 2. Number of planned projects and total funding sought, by region
@@ -34,10 +34,29 @@ I am an entry-level analyst at an investment firm that finances **sustainable in
 ## Load packages
 
 ```{r packages}
-# Install and load packages
-if(!require("pacman"))install.packages("pacman")
+# Packages used in this report. Install any that are missing ONCE in the R console (not inside this file):
+# install.packages(c("tidyverse", "tidytext", "knitr", "scales", "pROC", "glmnet", "rpart", "rpart.plot", "patchwork", "topicmodels", "slam", "corrplot", "factoextra", "broom","stringi", "cluster", "class"))
 
-pacman::p_load(tidyverse, tidytext, knitr, scales, caret, pROC, MLmetrics, ranger, glmnet, rpart, patchwork, topicmodels, slam, corrplot, factoextra, tidymodels, rpart.plot, kknn, glmnet)
+needed <- c("tidyverse", "tidytext", "knitr", "scales", "pROC", "glmnet", "rpart", "rpart.plot", "patchwork", "topicmodels", "slam", "corrplot", "factoextra", "broom", "stringi", "cluster", "class")
+
+missing_pkgs <- needed[!vapply(needed, requireNamespace, logical(1), quietly = TRUE)]
+
+if (length(missing_pkgs) > 0) {
+  stop("Please install these packages first: ", paste(missing_pkgs, collapse = ", "))
+}
+
+library(tidyverse)    # dplyr, tidyr, ggplot2, stringr, forcats, purrr, readr
+library(tidytext)     # tokenising and text analysis
+library(knitr)        # kable() tables
+library(scales)       # label formatting
+library(pROC)         # ROC curves and AUC
+library(glmnet)       # elastic-net logistic regression
+library(rpart)        # decision tree
+library(patchwork)    # combining plots
+library(topicmodels)  # LDA topic model
+library(slam)         # sparse matrices used by the topic model
+library(corrplot)     # correlation plots
+library(factoextra)   # PCA / cluster plots
 ```
 
 ```{r defining-global-theme}
@@ -53,6 +72,11 @@ col_grey   <- "grey65"
 
 ```{r}
 set.seed(123)
+```
+
+```{r cleanup-01, include=FALSE}
+rm(missing_pkgs, needed)
+graphics.off()
 ```
 
 # Data Import and Initial Inspection
@@ -129,7 +153,7 @@ cat("Rows:", nrow(firms_raw), "| columns:", ncol(firms_raw), "\n")
 cat("Exact duplicate rows:", sum(duplicated(firms_raw)), "\n")
 ```
 
-**Findings:** There are **4 exact duplicate rows** (each of these four cities, Busan, Gwangju, Chapel Hill and Sanggau, appears twice with every field identical and no project details). I removed them, so the working table has `r nrow(projects_raw)-4` rows (from `r nrow(projects_raw)`). 
+**Findings:** There are 4 exact duplicate rows (each of these four cities, Busan, Gwangju, Chapel Hill and Sanggau, appears twice with every field identical and no project details). I removed them, so the working table has `r nrow(projects_raw)-4` rows (from `r nrow(projects_raw)`). 
 
 There is no duplicate rows in firms data.
 
@@ -155,21 +179,28 @@ ggplot(miss_tbl, aes(x = pct_missing, y = reorder(variable, pct_missing))) +
        x = "Share of rows missing", y = NULL)
 ```
 
-**Interpretation:** missingness is heavy in the collaboration flags (`collab_business` is missing for about 63% of rows), in project costs, and in firm emissions (`env_co2s3` is missing for about half of firms). Missing collaboration flags are probably "not reported" rather than "No", so I treat only `collab_business == 1` as *confirmed* experience. In the firm data, missing emissions mostly means the firm does not disclose them, so later I will keep a "was missing" indicator when I build the model. There are a few exact duplicate project rows, which I remove.
+**Findings:** Missingness is heavy in the collaboration flags (`collab_business` is missing for about 63% of rows), in project costs, and in firm emissions (`env_co2s3` is missing for about half of firms). Missing collaboration flags are probably "not reported" rather than "No", so I treat only `collab_business == 1` as *confirmed* experience. In the firm data, missing emissions mostly means the firm does not disclose them, so later I will keep a "was missing" indicator when I build the model. There are a few exact duplicate project rows, which I remove.
+
+```{r cleanup-02, include=FALSE}
+rm(miss_tbl)
+graphics.off()
+```
 
 ## Cleaning the project data
 
 Steps and reasons:
 
 1. `distinct()` removes exact duplicate rows so projects are not double counted.
+
 2. The text columns contain leftover escape codes such as `\n` and `\uXXXX` from the raw survey export, so I write a small cleaning function with `stringr` and `stringi`.
-3. The project description starts with a project *type* (for example "Transport - ..."), so I extract it with a regular expression. This is **data extraction** from text.
+
+3. The project description starts with a project type, so I extract it with a regular expression. This is data extraction from text.
 
 ```{r clean-projects}
 clean_text <- function(x) {
   x |>
-    str_replace_all("\\\\+n", " ") |>        # literal "\n" characters -> space
-    stringi::stri_unescape_unicode() |>      # turn "\u00a3" style codes into real symbols
+    str_replace_all("\\\\+n", " ") |>  # literal "\n" characters -> space
+    stringi::stri_unescape_unicode() |> # turn "\u00a3" style codes into real symbols
     str_squish()
 }
 
@@ -187,6 +218,11 @@ projects |>
   kable(caption = "Most common project types (first words of project_info)")
 ```
 
+```{r cleanup-03, include=FALSE}
+rm(clean_text, projects_raw)
+graphics.off()
+```
+
 ## Is the city information constant within a city?
 
 The climate hazard text and the economic indicators are repeated on every project row of a city. I check that each city has exactly one value so that I can safely collapse to one row per city.
@@ -194,8 +230,7 @@ The climate hazard text and the economic indicators are repeated on every projec
 ```{r city-constant}
 const_check <- projects |>
   group_by(cityid) |>
-  summarise(across(c(cityname, cityarea, cityregion, area_population, econ_gdpt, econ_gdtg,
-                     soc_water, climate_hazard), n_distinct)) |>
+  summarise(across(c(cityname, cityarea, cityregion, area_population, econ_gdpt, econ_gdtg,soc_water, climate_hazard), n_distinct)) |>
   summarise(across(-cityid, max))
 
 const_check
@@ -209,7 +244,12 @@ cities <- projects |>
 cat("Unique cities:", nrow(cities), "\n")
 ```
 
-**Interpretation:** every value is `1`, so the city-level fields are indeed constant within a city. I now have a **city table** (`cities`, 684 rows) for the hazard analysis and a **project table** (`projects`) for the funding analysis.
+**Findings:** every value is `1`, so the city-level fields are indeed constant within a city. I now have a city table (`cities`, `r nrow(cities)` rows) for the hazard analysis and a project table (`projects`) for the funding analysis.
+
+```{r cleanup-04, include=FALSE}
+rm(const_check)
+graphics.off()
+```
 
 ## Cleaning the firm data
 
@@ -218,20 +258,21 @@ firms <- firms_raw |>
   mutate(env_contro = factor(env_contro, levels = c(1, 0), labels = c("Yes", "No")))
 
 # the outcome: "Yes" is listed first so that tidymodels treats "Yes" as the event of interest
+
 table(firms$env_contro)
 prop.table(table(firms$env_contro))
 ```
 
-**Interpretation:** only about 2.8% of firms have an environmental controversy. This is a strongly **imbalanced** outcome, which will shape how I build and judge the model in Part 4 (accuracy would be a misleading metric).
+**Findings:** only about 2.8% of firms have an environmental controversy. This is a strongly imbalanced outcome, which will shape how I build and judge the model in Part 4 (accuracy would be a misleading metric).
 
-```{r}
-#rm(const_check, miss_tbl, clean_text)
+```{r cleanup-05, include=FALSE}
+rm(firms_raw)
 graphics.off()
 ```
 
 # Part 1: Most common climate hazards affecting communities
 
-The column `climate_hazard` is free text. For each city it contains several hazards written like `Hazard name: description | Hazard name: description ...`. To answer "which hazards are most common", I need to **extract the hazard names** from the text and then count how many *cities* report each hazard. Then I look at the descriptions with **text analysis** to see *how* communities are affected, I test whether differences between regions are statistically real, and finally I use **PCA and clustering** to see whether groups of similar cities face different hazards.
+The column `climate_hazard` is free text. For each city it contains several hazards written like `Hazard name: description | Hazard name: description ...`. To answer "which hazards are most common", I need to extract the hazard names from the text and then count how many *cities* report each hazard. Then I look at the descriptions with text analysis to see *how* communities are affected, I test whether differences between regions are statistically real, and finally I use PCA and clustering to see whether groups of similar cities face different hazards.
 
 ## City profile
 
@@ -262,7 +303,12 @@ p3 <- cities |>
 (p1 | p2) / p3
 ```
 
-**Interpretation:** the data are global but not evenly spread. North America, Latin America, Europe and "UKWW" (the label used in the dataset, mostly UK, South Africa and Türkiye) dominate, while India, Japan and China have only a handful of cities each. So conclusions about those three regions will be weak. The United States, Brazil and the United Kingdom supply the largest number of cities. I used a log scale for population because city size is very right-skewed.
+**Findings:** the data are global but not evenly spread. North America, Latin America, Europe and "UKWW" (the label used in the dataset, mostly UK, South Africa and Türkiye) dominate, while India, Japan and China have only a handful of cities each. So conclusions about those three regions will be weak. The United States, Brazil and the United Kingdom supply the largest number of cities. I used a log scale for population because city size is very right-skewed.
+
+```{r cleanup-06, include=FALSE}
+rm(p1, p2, p3)
+graphics.off()
+```
 
 ## Extracting the hazard names from the text
 
@@ -337,9 +383,14 @@ hazards <- hazards |>
 setdiff(unique(hazards$hazard), hazard_family$hazard)
 ```
 
+```{r cleanup-07, include=FALSE}
+rm(hazard_family, hazard_segments, valid_hazards)
+graphics.off()
+```
+
 ## The most common hazards
 
-I count the **percentage of cities** that report each hazard. I use percentages of cities (684) rather than raw project counts because a city is the unit that experiences a hazard.
+I count the percentage of cities that report each hazard. I use percentages of cities (684) rather than raw project counts because a city is the unit that experiences a hazard.
 
 ```{r hazard-counts, fig.height=7}
 n_cities_with_text <- n_distinct(hazards$cityid)
@@ -417,10 +468,10 @@ g3 <- top10_tbl |>
 wrap_plots(wrap_plots(g1, g2, nrow = 1), g3, ncol = 1)
 ```
 
-**Findings:** the top three individual hazards are **extreme heat, urban flooding and drought**. When I group hazards into families, **flooding and heavy rain** is the broadest problem (about nine in ten cities mention at least one flood-type hazard), followed by **heat** (about three in four cities) and **drought / water scarcity** (a little over half). This tells me that the climate risks to communities are mainly about **too much water, too little water and too much heat**. These are the threats that infrastructure such as drainage, wastewater, waste and water systems, and cooling or green space projects must address.
+**Findings:** the top three individual hazards are extreme heat, urban flooding and drought. When I group hazards into families, flooding and heavy rain is the broadest problem (about nine in ten cities mention at least one flood-type hazard), followed by heat (about three in four cities) and drought / water scarcity (a little over half). This tells me that the climate risks to communities are mainly about too much water, too little water and too much heat. These are the threats that infrastructure such as drainage, wastewater, waste and water systems, and cooling or green space projects must address.
 
-```{r}
-#rm(top10_tbl, h1, h2, g1, g2, g3, p1, p2, p3, valid_hazards)
+```{r cleanup-08, include=FALSE}
+rm(g1, g2, g3, h1, h2, top10_tbl)
 graphics.off()
 ```
 
@@ -439,6 +490,11 @@ ggplot(hazards_per_city, aes(x = n_hazards)) +
 ```
 
 **Findings:** A typical city reports about five hazards, so risks are compound. For investors this means a single project (for example nature-based flood protection) can have several benefits.
+
+```{r cleanup-09, include=FALSE}
+
+graphics.off()
+```
 
 ## Hazards by region
 
@@ -468,8 +524,8 @@ ggplot(region_hazard, aes(x = reorder(hazard, -pct, FUN = mean), y = region_labe
 
 **Findings:** The heatmap shows that hazards are not equally common everywhere. Extreme heat is reported by roughly 80% of North American and UKWW cities and about 73% of European cities, but only about one third of cities in South East Asia & Oceania. Urban flooding and drought are reported fairly evenly across the big regions (about 50-60% of cities), while fire weather is mostly a North American, European and Latin American concern (around 40% of cities) and is almost absent from the Asian regions. Regions with very few cities (China, India, Japan) should not be over-interpreted. In 1.6 I test statistically whether these regional differences are real.
 
-```{r}
-#rm(hazard_family, hazard_segments, region_hazard, region_n, top10)
+```{r cleanup-10, include=FALSE}
+rm(region_hazard, region_n, top10)
 graphics.off()
 ```
 
@@ -549,7 +605,7 @@ trigrams |>
   slice_head(n = 15) |>
   ggplot(aes(x = n, y = reorder(trigram, n))) +
   geom_col(fill = col_accent) +
-  labs(title = "Most common two-word phrases", x = "Frequency", y = NULL)
+  labs(title = "Most common three-word phrases", x = "Frequency", y = NULL)
 ```
 
 **Findings:** The top 6 most frequent three words are **"low income households", "sea level rise", "extreme weather events", "poor air quality", "heat related illness" and "urban heat island**. They also show the mechanisms (heat waves, sea level rise, air quality) and the groups at risk (low-income households, outdoor workers), which helps connect hazards with infrastructure solutions.
@@ -577,19 +633,14 @@ quadgrams |>
   slice_head(n = 15) |>
   ggplot(aes(x = n, y = reorder(quadgram, n))) +
   geom_col(fill = col_accent) +
-  labs(title = "Most common two-word phrases", x = "Frequency", y = NULL)
+  labs(title = "Most common four-word phrases", x = "Frequency", y = NULL)
 ```
 
 **Findings:** The phrases contain income and heat in most frequently. It is apparent that the context squeezes if we increase number of words and sample size also decreases. Thus, in our case, its better to use bigram to understand the hazard descriptions efficiently.
 
-```{r}
-#rm(custom_stop, bigrams, trigrams, quadgrams)
-graphics.off()
-```
-
 ### Which words are special to each hazard family? (TF-IDF)
 
-Plain word counts are dominated by common words. **TF-IDF** gives a high score to words that are frequent in one group but rare in the others, so it highlights what is *distinctive*.
+Plain word counts are dominated by common words. TF-IDF gives a high score to words that are frequent in one group but rare in the others, so it highlights what is *distinctive*.
 
 ```{r tfidf, fig.height=8}
 tfidf_family <- tokens |>
@@ -630,14 +681,9 @@ ggplot(sent, aes(x = net_sentiment, y = reorder(family, net_sentiment))) +
 
 **Findings:** Every family has a clearly negative net score (roughly -0.5 to -0.7), as expected for descriptions of damage and vulnerability. Wildfire and flooding descriptions are the most negative, while heat and health are slightly less negative, possibly because those descriptions also mention support programmes and protective actions. A limitation I should mention: lexicon methods count words only and do not understand context (for example "protect" is positive even when talking about a risk).
 
-```{r}
-#rm(tfidf_family)
-graphics.off()
-```
-
 ### Topic modelling (LDA)
 
-To check what themes exist without telling the model the hazard names, I use **Latent Dirichlet Allocation (LDA)**. I combine all descriptions for each city into one document, build a document-term matrix, and ask for 4 topics. The number of topics is a judgement call; 4 gives themes that are easy to interpret.
+To check what themes exist without telling the model the hazard names, I use Latent Dirichlet Allocation (LDA). I combine all descriptions for each city into one document, build a document-term matrix, and ask for 4 topics. The number of topics is a judgement call; 4 gives themes that are easy to interpret.
 
 ```{r lda, fig.height=6}
 dtm <- tokens |>
@@ -666,8 +712,8 @@ ggplot(lda_terms, aes(x = beta, y = reorder_within(term, beta, topic), fill = fa
 
 **Findings:** LDA does not name its topics, so I read the top words of each topic and name the themes myself. In my run the topics separate into themes that line up with the hazard families (for example heat and health of vulnerable people, rain / flooding and drainage damage, water supply and drought, and storms or coastal damage to infrastructure). 
 
-```{r}
-#rm(dtm, lda_fit, lda_terms, sent, tokens)
+```{r cleanup-11, include=FALSE}
+rm(bigrams, custom_stop, dtm, lda_fit, lda_terms, quadgrams, sent, tfidf_family, tokens,trigrams)
 graphics.off()
 ```
 
@@ -753,13 +799,13 @@ ggplot(water_df, aes(x = drought, y = soc_water, fill = drought)) +
   labs(title = "National safe-water coverage by drought reporting",
        x = NULL, y = "% of population with safely managed drinking water")
 
-t_water <- t.test(soc_water ~ drought, data = water_df)          # Welch t-test (does not assume equal variances)
-w_water <- wilcox.test(soc_water ~ drought, data = water_df)     # non-parametric check (distribution is skewed)
+t_water <- t.test(soc_water ~ drought, data = water_df) # Welch t-test (does not assume equal variances)
+w_water <- wilcox.test(soc_water ~ drought, data = water_df)  # non-parametric check (distribution is skewed)
 t_water
 w_water
 ```
 
-**Findings:** safe-water coverage is strongly left-skewed (many countries are near 100%), so the t-test assumption of normality is doubtful. That is why I also run the Wilcoxon test as a robustness check. Both tests give the same answer: the Welch t-test p-value is `r round(t_water$p.value, 2)` and the Wilcoxon p-value is `r round(w_water$p.value, 2)`, and the two group means are very close (about `r round(t_water$estimate[1], 1)`% vs `r round(t_water$estimate[2], 1)`%). So my hypothesis was **not supported**: there is no evidence that cities reporting drought sit in countries with weaker water services. Drought and water scarcity affect cities in both well-served and poorly-served countries. For an investor this is a useful finding: water-resilience projects are relevant everywhere, not only in developing countries.
+**Findings:** safe-water coverage is strongly left-skewed (many countries are near 100%), so the t-test assumption of normality is doubtful. That is why I also run the Wilcoxon test as a robustness check. Both tests give the same answer: the Welch t-test p-value is `r round(t_water$p.value, 2)` and the Wilcoxon p-value is `r round(w_water$p.value, 2)`, and the two group means are very close (about `r round(t_water$estimate[1], 1)`% vs `r round(t_water$estimate[2], 1)`%). So my hypothesis was not supported: there is no evidence that cities reporting drought sit in countries with weaker water services. Drought and water scarcity affect cities in both well-served and poorly-served countries. For an investor this is a useful finding: water-resilience projects are relevant everywhere, not only in developing countries.
 
 ### Do regions differ in the number of hazards? (ANOVA)
 
@@ -794,8 +840,8 @@ corrplot(cor(corr_vars, use = "pairwise.complete.obs"), method = "color", type =
 
 **Findings:** National GDP and greenhouse gas emissions are very strongly correlated (about 0.9), which simply says that big economies emit more in total. R&D spending is strongly correlated with sanitation (about 0.77) and safe water (about 0.65), and safe water and sanitation are correlated with each other (about 0.69), so they all describe the national level of development. GDP growth is negatively correlated with safe water (about -0.5), which is typical of fast-growing emerging economies that still have service gaps. Highly correlated variables carry overlapping information, which is exactly why I use PCA next.
 
-```{r}
-#rm(aov_fit, chisq_heat, ci_tbl,city_flags, corr_vars, t_water, w_water, water_df, tab_heat)
+```{r cleanup-12, include=FALSE}
+rm(aov_fit, chisq_heat, ci_tbl, city_flags, corr_vars, t_water, tab_heat, w_water, water_df)
 graphics.off()
 ```
 
@@ -876,6 +922,11 @@ ggplot(cluster_hazard, aes(x = pct, y = reorder(family, pct), fill = cluster)) +
 
 **Findings:** The three clusters differ mainly in economic size, water services and inflation. In my run one cluster is dominated by Latin American cities in emerging economies with the weakest safe-water coverage (about two thirds of the population) and the highest inflation; one is mostly European cities in smaller, high-service economies; and one is mostly North American cities in the largest economy. Flooding is reported by more than 80% of cities in every cluster, and drought is similarly common in all three (roughly 53% to 59%), which again shows that these are global problems and not limited to one type of economy. The emerging-economy cluster reports relatively more health and land-related hazards (such as landslides) but less heat, cold and wildfire than the other two. 
 
+```{r cleanup-13, include=FALSE}
+rm(cities, city_clusters, cluster_hazard, hazards, km_city, pca_city, pca_data, scores)
+graphics.off()
+```
+
 ## Summary of main findings for Part 1
 
 ```{r findings-part1, echo=FALSE}
@@ -895,8 +946,8 @@ fam1 <- family_counts |> slice_head(n = 1)
 
 6. **Limitations.** The data are self-reported by cities that chose to disclose, regions such as India, Japan and China have very few cities, and hazard names were extracted from free text.
 
-```{r}
-#rm(n_cities_with_text, cities, city_clusters, cluster_hazard, fam1, family_counts, hazard_counts, hazards, hazards_per_city, km_city, pca_city, pca_data, scores, top3)
+```{r cleanup-14, include=FALSE}
+rm(fam1, family_counts, hazard_counts, hazards_per_city, n_cities_with_text, top3)
 graphics.off()
 ```
 
@@ -930,19 +981,23 @@ projects |>
         caption = "The eight largest investment costs in the data")
 ```
 
-**Findings:** The three largest values (about 3.7 quadrillion, 13 trillion and 5.4 trillion USD) are **greater than the annual GDP of the country** where the city is located. That is not realistic for a single city project, so I treat these as likely data-entry or currency errors (for example a local currency value typed in as USD). If I leave them in, they would swamp every other project and make the regional totals meaningless.
+**Findings:** The three largest values (about 3.7 quadrillion, 13 trillion and 5.4 trillion USD) are greater than the annual GDP of the country where the city is located. That is not realistic for a single city project, so I treat these as likely data-entry or currency errors (for example a local currency value typed in as USD). If I leave them in, they would swamp every other project and make the regional totals meaningless.
 
 My cleaning rule is: *an investment cost larger than the national GDP is treated as an error and excluded from totals* (the project is still counted as a planned project). Other very large values, such as the multi-billion-dollar plans in London or Manchester, are below this limit and I keep them. I also check how many projects have an investment cost larger than the total cost, which is logically odd:
 
 ```{r cost-flags}
 projects <- projects |>
   mutate(cost_error = !is.na(cost_to_gdp) & cost_to_gdp > 1,
-         investment_clean = if_else(cost_error, NA_real_, project_investmentcost))
+         investment_clean = if_else(cost_error, NA_real_, project_investmentcost),
+         # stricter check: an investment cost larger than the project's own total cost is inconsistent
+         inconsistent_cost = !is.na(project_investmentcost) & !is.na(project_totalcost) &
+                               project_investmentcost > project_totalcost,
+         investment_strict = if_else(cost_error | inconsistent_cost, NA_real_, project_investmentcost))
 
 cat("Projects flagged as cost errors (cost > national GDP):", sum(projects$cost_error, na.rm = TRUE), "\n")
 
 cat("Projects where investment cost > total cost         :",
-    sum(projects$project_investmentcost > projects$project_totalcost, na.rm = TRUE), "(kept, but noted)\n")
+    sum(projects$project_investmentcost > projects$project_totalcost, na.rm = TRUE), "(kept in the main total, removed in the stricter total)\n")
 
 cat("Projects with a reported investment cost of zero     :",
     sum(projects$project_investmentcost == 0, na.rm = TRUE), "\n")
@@ -958,20 +1013,23 @@ region_summary <- projects |>
             projects_with_cost = sum(!is.na(investment_clean)),
             funding_raw_usd    = sum(project_investmentcost, na.rm = TRUE),
             funding_clean_usd  = sum(investment_clean, na.rm = TRUE),
+            funding_strict_usd = sum(investment_strict, na.rm = TRUE),
             median_cost_usd    = median(investment_clean[investment_clean > 0], na.rm = TRUE),
             .groups = "drop") |>
   arrange(desc(funding_clean_usd))
 
 region_total_row <- region_summary |>
-  summarise(cityregion = "TOTAL", across(c(planned_projects, projects_with_cost, funding_raw_usd, funding_clean_usd), sum),
+  summarise(cityregion = "TOTAL", across(c(planned_projects, projects_with_cost, funding_raw_usd, funding_clean_usd, funding_strict_usd), sum),
             median_cost_usd = median(projects$investment_clean[projects$investment_clean > 0], na.rm = TRUE))
 
 bind_rows(region_summary, region_total_row) |>
   mutate(funding_clean_bn = funding_clean_usd / 1e9,
+         funding_strict_bn = funding_strict_usd / 1e9,
          funding_raw_bn   = funding_raw_usd / 1e9) |>
   select(Region = cityregion, `Planned projects` = planned_projects,
          `Projects with a cost` = projects_with_cost,
          `Funding sought, cleaned (USD bn)` = funding_clean_bn,
+         `Funding, stricter rule (USD bn)` = funding_strict_bn,
          `Funding incl. outliers (USD bn)` = funding_raw_bn,
          `Median project cost (USD)` = median_cost_usd) |>
   kable(digits = 1, format.args = list(big.mark = ","),
@@ -997,23 +1055,27 @@ r1 + r2 + plot_annotation(title = "Projects are spread across regions, but fundi
 ```{r region-text, echo=FALSE}
 top_n_reg <- region_summary |> slice_max(planned_projects, n = 1)
 top_f_reg <- region_summary |> slice_max(funding_clean_usd, n = 1)
+top_f_strict <- region_summary |> slice_max(funding_strict_usd, n = 1)
+china <- region_summary |> filter(cityregion == "China")
 tot <- region_total_row
 ```
 
 **Findings:**
 
-* In total there are **`r comma(tot$planned_projects)` planned projects**, and `r comma(tot$projects_with_cost)` of them (about `r percent(tot$projects_with_cost / tot$planned_projects, accuracy = 1)`) have a usable investment cost. After removing the three unrealistic values, the total funding sought is about **USD `r comma(tot$funding_clean_usd / 1e9, accuracy = 0.1)` billion**. With the outliers included it would have been about USD `r comma(tot$funding_raw_usd / 1e12, accuracy = 1)` trillion, which shows why the check was necessary.
+* In total there are **`r comma(tot$planned_projects)` planned projects**, and `r comma(tot$projects_with_cost)` of them (about `r percent(tot$projects_with_cost / tot$planned_projects, accuracy = 1)`) have a usable investment cost. After removing the `r sum(projects$cost_error, na.rm = TRUE)` unrealistic values, the total funding sought is about **USD `r comma(tot$funding_clean_usd / 1e9, accuracy = 0.1)` billion**. With the outliers included it would have been about USD `r comma(tot$funding_raw_usd / 1e12, accuracy = 1)` trillion, which shows why the check was necessary.
+
+* **Stricter check:** The values removed above are those larger than national GDP, but some remaining entries are also inconsistent: `r sum(projects$inconsistent_cost, na.rm = TRUE)` projects state an investment cost larger than their own total cost (in some cases many times larger). If these are also excluded, the total funding sought falls from about USD `r comma(tot$funding_clean_usd / 1e9, accuracy = 0.1)` billion to about **USD `r comma(tot$funding_strict_usd / 1e9, accuracy = 0.1)` billion**, and **`r top_f_strict$cityregion`** is the largest region (about USD `r comma(top_f_strict$funding_strict_usd / 1e9, accuracy = 0.1)` billion). The main table keeps the original rule, so the manager should treat the "stricter rule" column as the more cautious estimate.
 
 * **`r top_n_reg$cityregion`** has the most planned projects (`r comma(top_n_reg$planned_projects)`), while **`r top_f_reg$cityregion`** has the largest amount of funding sought (about USD `r comma(top_f_reg$funding_clean_usd / 1e9, accuracy = 0.1)` billion).
 
-* The median project cost is much smaller than the average , so a few very large programs drive the totals. For planning, the **median** is a better guide to a typical project and the **total** is a better guide to the size of the overall market.
+* The median project cost is much smaller than the average , so a few very large programs drive the totals. For planning, the median is a better guide to a typical project and the total is a better guide to the size of the overall market.
 
-* Caution: about `r percent(1 - tot$projects_with_cost / tot$planned_projects, accuracy = 1)` of projects have no usable investment cost, so the true funding need is larger than these totals. Regions where many projects have no cost (compare "Planned projects" with "Projects with a cost") are under-reported; for example none of the 10 Chinese projects has a cost, so China shows zero funding even though it has planned projects.
+* Caution: about `r percent(1 - tot$projects_with_cost / tot$planned_projects, accuracy = 1)` of projects have no usable investment cost, so the true funding need is larger than these totals. Regions where many projects have no cost (compare "Planned projects" with "Projects with a cost") are under-reported; for example none of the `r china$planned_projects` Chinese projects has a usable cost (`r china$projects_with_cost` with a cost), so China shows zero funding even though it has planned projects.
 
-* The funding total is very concentrated: UKWW alone makes up most of the cleaned total, mainly because of a few very large programmes such as those in the Greater London Authority and Greater Manchester. Planned *project counts* are much more evenly spread than *money*.
+* The funding total is very concentrated: `r top_f_reg$cityregion` alone makes up `r percent(top_f_reg$funding_clean_usd / tot$funding_clean_usd, accuracy = 1)` of the cleaned total, mainly because of a few very large programmes such as those in the Greater London Authority and Greater Manchester. Planned *project counts* are much more evenly spread than *money*.
 
-```{r}
-#rm(region_summary, region_total_row, top_f_reg, top_n_reg, tot, r1, r2)
+```{r cleanup-15, include=FALSE}
+rm(china, r1, r2, region_summary, region_total_row, top_f_reg, top_f_strict, top_n_reg, tot)
 graphics.off()
 ```
 
@@ -1023,15 +1085,15 @@ graphics.off()
 
 The scenario gives me four business criteria. I translate each into a filter in R:
 
-1. Industry expertise in **waste management:** Project type starts with "Waste management" **or** the description contains waste-related words (waste, recycling, landfill, compost, circular economy and similar). I exclude wastewater (which is a water-sector project) and "waste heat" (an energy project).
+1. Industry expertise in waste management: the city itself labels the project as "Waste management" (the project type at the start of `project_info`). I use this label as the main rule because keyword matching also catches broad multi-sector programmes that only mention "circular economy" or "waste" in passing. Projects outside the waste sector that merely contain waste-related words (waste, recycling, landfill, compost, circular economy and similar; excluding wastewater and "waste heat") are not ranked; I show them in a separate manual-review list below.
 
-2. Prefers partners who have **collaborated with private for-profit organisations:** `collab_business == 1` (confirmed past collaboration). Missing values are *not* treated as "yes".
+2. Prefers partners who have collaborated with private for-profit organisations: `collab_business == 1` (confirmed past collaboration). Missing values are *not* treated as "yes".
 
-3. Track record of **loans and public-private partnerships:** for public sector projects `project_fundingmodel` contains "Loans" (commercial banks or international financial institutions) or "Public-private partnership".
+3. Track record of loans and public-private partnerships: for public sector projects `project_fundingmodel` contains "Loans" (commercial banks or international financial institutions) or "Public-private partnership".
 
-4. Needs a **known investment cost** to rank: `project_investmentcost` is available, above zero and not flagged as an error.
+4. Needs a known investment cost to rank: `project_investmentcost` is available, above zero and not flagged as an error.
 
-Then I rank the surviving projects in **descending order of investment cost sought**, as my manager asked.
+Then I rank the surviving projects in descending order of investment cost sought, as my manager asked.
 
 ## Applying the filters
 
@@ -1042,18 +1104,18 @@ projects <- projects |>
   mutate(info_lower = str_to_lower(project_info),
          waste_keyword = str_detect(info_lower, waste_pattern) &
            !str_detect(info_lower, "wastewater|waste water|waste heat|waste-water"),
-         is_waste = (str_detect(project_type, "^Waste management") %in% TRUE) | waste_keyword,
+         is_waste = (str_detect(project_type, "^Waste management") %in% TRUE),
+         waste_keyword_only = waste_keyword & !is_waste,   # waste words, but not labelled as waste management
          business_collab = collab_business %in% 1,
          loan_or_ppp = str_detect(project_fundingmodel, "Loans|Public-private") %in% TRUE)
 
 funnel <- tribble(
   ~step, ~projects,
-  "All planned projects",                          sum(projects$is_project),
-  "1. Waste management projects",                  sum(projects$is_project & projects$is_waste),
-  "2. ... and city has business collaboration",    sum(projects$is_project & projects$is_waste & projects$business_collab),
-  "3. ... and funding model is loan or PPP",       sum(projects$is_project & projects$is_waste & projects$business_collab & projects$loan_or_ppp),
-  "4. ... and a positive, plausible cost is known", sum(projects$is_project & projects$is_waste & projects$business_collab & projects$loan_or_ppp &
-                                                       (projects$investment_clean > 0) %in% TRUE)
+  "All planned projects", sum(projects$is_project),
+  "1. Waste management projects", sum(projects$is_project & projects$is_waste),
+  "2. ... and city has business collaboration", sum(projects$is_project & projects$is_waste & projects$business_collab),
+  "3. ... and funding model is loan or PPP",  sum(projects$is_project & projects$is_waste & projects$business_collab & projects$loan_or_ppp),
+  "4. ... and a positive, plausible cost is known", sum(projects$is_project & projects$is_waste & projects$business_collab & projects$loan_or_ppp & (projects$investment_clean > 0) %in% TRUE)
 )
 
 ggplot(funnel, aes(x = projects, y = factor(step, levels = rev(step)))) +
@@ -1064,7 +1126,12 @@ ggplot(funnel, aes(x = projects, y = factor(step, levels = rev(step)))) +
        x = "Number of projects", y = NULL)
 ```
 
-**Findings:** The funnel shows that the firm's criteria are quite selective. Waste projects are common, but only a minority come from cities with confirmed private-sector collaboration and a loan or PPP funding model, and fewer still have a reported investment cost. In my run the funnel goes from 2,477 projects to 438 waste projects, 140 with business collaboration, 51 with a loan or PPP funding model and finally 31 with a usable cost. Because of this, the final list is short and highly targeted, which suits an investment firm that wants a manageable pipeline.
+**Findings:** The funnel shows that the firm's criteria are quite selective. Waste projects are common, but only a minority come from cities with confirmed private-sector collaboration and a loan or PPP funding model, and fewer still have a reported investment cost. In my run the funnel goes from `r comma(funnel$projects[1])` projects to `r funnel$projects[2]` waste projects, `r funnel$projects[3]` with business collaboration, `r funnel$projects[4]` with a loan or PPP funding model and finally `r funnel$projects[5]` with a usable cost. Because of this, the final list is short and highly targeted, which suits an investment firm that wants a manageable pipeline.
+
+```{r cleanup-16, include=FALSE}
+rm(funnel, waste_pattern)
+graphics.off()
+```
 
 ## The ranked list
 
@@ -1078,7 +1145,8 @@ ranked <- projects |>
   transmute(Rank, City = cityname, Country = cityarea, Region = cityregion, Project,
             `Funding model`,
             `Investment cost (USD)` = investment_clean,
-            `Total cost (USD)` = project_totalcost)
+            `Total cost (USD)` = project_totalcost,
+            `Cost check` = if_else(!is.na(project_totalcost) & investment_clean > project_totalcost, "investment cost > total cost", "ok"))
 
 kable(ranked, format.args = list(big.mark = ",", scientific = FALSE),
       caption = "Ranked list of waste-management projects with business collaboration and loan / PPP funding (descending investment cost)")
@@ -1101,7 +1169,36 @@ ranked |>
 r_top <- ranked |> slice_head(n = 3)
 ```
 
-**Findings:** There are **`r nrow(ranked)` projects** on the final list. The largest opportunities are in **`r r_top$City[1]`** (about USD `r comma(r_top$"Investment cost (USD)"[1] / 1e6, accuracy = 1)` million), **`r r_top$City[2]`** and **`r r_top$City[3]`**. Costs fall quickly down the ranking, so a small number of projects account for most of the money. For each of the top projects the firm should still do normal due diligence, because a high rank only means a large cost, not a good return.
+**Findings:** There are `r nrow(ranked)` projects on the final list. The largest opportunities are in `r r_top$City[1]` (about USD `r comma(r_top$"Investment cost (USD)"[1] / 1e6, accuracy = 1)` million), `r r_top$City[2]` and `r r_top$City[3]`. Costs fall quickly down the ranking, so a small number of projects account for most of the money. For each of the top projects the firm should still do normal due diligence, because a high rank only means a large cost, not a good return. Note also that `r sum(str_detect(ranked$Project, regex("wastewater", ignore_case = TRUE)))` of the ranked projects are wastewater systems that the city labelled as waste management; a water-treatment project may not match the firm's waste expertise, so these should be confirmed. The "Cost check" column flags `r sum(ranked$"Cost check" != "ok")` ranked project(s) whose investment cost is larger than the stated total cost.
+
+```{r cleanup-17, include=FALSE}
+rm(r_top)
+graphics.off()
+```
+
+## Manual-review list: waste-related projects outside the waste sector
+
+These projects pass the other three rules (business collaboration, loan or PPP funding, known cost) and mention waste-related words, but the city did not label them as waste management. They are not part of the ranked list above.
+
+```{r keyword-review}
+keyword_list <- projects |>
+  filter(is_project, waste_keyword_only, business_collab, loan_or_ppp, investment_clean > 0) |>
+  arrange(desc(investment_clean)) |>
+  transmute(Rank = row_number(), City = cityname, Region = cityregion,
+            `Project type` = project_type,
+            Project = str_trunc(str_squish(project_info), 110),
+            `Investment cost (USD)` = investment_clean)
+
+kable(keyword_list, format.args = list(big.mark = ",", scientific = FALSE),
+      caption = "Waste-related projects outside the waste sector (for manual review, not ranked)")
+```
+
+**Findings:** There are `r nrow(keyword_list)` such projects, worth about USD `r comma(sum(keyword_list$"Investment cost (USD)") / 1e6, accuracy = 1)` million in total. If they were mixed into the main ranking they would make up `r percent(sum(keyword_list$"Investment cost (USD)") / (sum(keyword_list$"Investment cost (USD)") + sum(ranked$"Investment cost (USD)")), accuracy = 1)` of the combined value, and the largest, in `r keyword_list$City[1]`, would be ranked first. Some of these (for example landfill gas or biogas) are genuinely waste-related, but others are broad multi-sector programmes where waste is only a small part, so an analyst should read the full project descriptions before treating any of them as an opportunity for a waste-focused firm.
+
+```{r cleanup-18, include=FALSE}
+rm(keyword_list)
+graphics.off()
+```
 
 ## What I left out (sensitivity checks)
 
@@ -1112,28 +1209,30 @@ rule_sensitivity <- tibble(
                "Include wastewater projects",
                "Doesn't require business collaboration",
                "Doesn't require loan/ PPP funding model",
-               "Waste projects meeting rules 1-3 but with no cost reported (watch list)"),
+               "Waste projects meeting rules 1-3 but with no cost reported (watch list)",
+               "Also accept waste keywords outside the waste sector (see manual-review list)"),
   Projects = c(
     sum(base_ok & projects$is_waste),
     sum(base_ok & (projects$is_waste | str_detect(projects$info_lower, "wastewater|waste water") %in% TRUE)),
     sum(projects$is_project & projects$is_waste & projects$loan_or_ppp & (projects$investment_clean > 0) %in% TRUE),
     sum(projects$is_project & projects$is_waste & projects$business_collab & (projects$investment_clean > 0) %in% TRUE),
-    sum(projects$is_project & projects$is_waste & projects$business_collab & projects$loan_or_ppp & !((projects$investment_clean > 0) %in% TRUE))
+    sum(projects$is_project & projects$is_waste & projects$business_collab & projects$loan_or_ppp & !((projects$investment_clean > 0) %in% TRUE)),
+    sum(base_ok & (projects$is_waste | projects$waste_keyword_only))
   )
 )
 kable(rule_sensitivity, caption = "How the list changes if I relax or change a rule")
 ```
 
-**Findings:** The list is sensitive to the business rules. Relaxing the collaboration rule or the funding-model rule would increase the list from 31 to roughly 80 projects in each case, while adding wastewater adds only a few projects. The firm can therefore widen the search if it needs more deal flow. I also note a **watch list** of projects that satisfy the other rules but have no cost reported; the firm could contact those cities to ask for the missing cost information.
+**Findings:** The list is sensitive to the business rules. Relaxing the collaboration rule or the funding-model rule would increase the list from `r rule_sensitivity$Projects[1]` to `r rule_sensitivity$Projects[3]` or `r rule_sensitivity$Projects[4]` projects, accepting waste keywords outside the waste sector would add `r rule_sensitivity$Projects[6] - rule_sensitivity$Projects[1]` (mostly broad programmes; see the manual-review list), and adding wastewater projects from other sectors adds `r rule_sensitivity$Projects[2] - rule_sensitivity$Projects[1]`. The firm can therefore widen the search if it needs more deal flow. I also note a watch list of projects that satisfy the other rules but have no cost reported; the firm could contact those cities to ask for the missing cost information.
 
-```{r}
-#rm(funnel, r_top, ranked, rule_sensitivity, base_ok, waste_pattern)
+```{r cleanup-19, include=FALSE}
+rm(base_ok, rule_sensitivity)
 graphics.off()
 ```
 
 ## Supporting analysis: what drives project investment cost? (linear regression)
 
-The ranking is by cost, so I want to understand what makes projects expensive. Cost is extremely right-skewed, so I model the **log (base 10) of the investment cost**. That way a coefficient can be read as a multiplication of cost. I use cleaned positive costs from all projects (not only waste projects) to have enough data.
+The ranking is by cost, so I want to understand what makes projects expensive. Cost is extremely right-skewed, so I model the log (base 10) of the investment cost. That way a coefficient can be read as a multiplication of cost. I use cleaned positive costs from all projects (not only waste projects) to have enough data.
 
 ```{r lm-data}
 lm_df <- projects |>
@@ -1186,8 +1285,8 @@ d1 + d2
 
 **Findings:** The log-log relationship between population and cost is positive, so larger cities plan bigger projects. In the regression, each coefficient shows how many "powers of ten" the cost changes when the variable increases by one unit while the others are held fixed; the *cost multiplier* column converts this into a plain multiple (for example 2 means about twice the cost). In my output, population and national GDP both have positive, highly significant effects (a ten-times larger city is associated with roughly 3 times higher project cost, since 10^0.5 is about 3.2). Compared with Europe (the reference region), projects in India and Latin America are much cheaper (about 5% and 15% of the European cost, holding other things equal), transport projects are about four times more expensive than the "other types" group, and cities with confirmed business collaboration plan projects roughly 2.4 times larger. Waste management projects are *not* significantly more or less expensive than the reference group. The R-squared is modest (about 0.18), which tells me that city size, national income, region and project type explain only part of the variation in project cost; much of the cost depends on the specific project. The diagnostic plots are reasonably acceptable after the log transformation: there is no strong funnel shape in the residuals, and the Q-Q plot follows the line apart from some tail departures. I therefore use this model to describe what is associated with cost and not to predict costs of single projects. Note that the regression shows association and not causation.
 
-```{r}
-#rm(aug, lm_df, lm_fit, lm_tidy, d1, d2)
+```{r cleanup-20, include=FALSE}
+rm(aug, d1, d2, lm_df, lm_fit, lm_tidy)
 graphics.off()
 ```
 
@@ -1195,7 +1294,7 @@ graphics.off()
 
 ## Understanding the business problem
 
-Ultimate goal is to build a classification model that predicts whether a firm is involved in an environmental controversy (`env_contro = Yes`). The model is for **initial screening**: firms flagged as high risk will be reviewed by experts.
+Ultimate goal is to build a classification model that predicts whether a firm is involved in an environmental controversy (`env_contro = Yes`). The model is for initial screening: firms flagged as high risk will be reviewed by experts.
 
 **Judgement:**
 
@@ -1203,9 +1302,9 @@ Ultimate goal is to build a classification model that predicts whether a firm is
 
 * The scenario says false positives are relatively cheap but **false negatives are costly** (a risky firm slips through). So I care most about **sensitivity (recall)**: the share of truly controversial firms that we catch.
 
-* I will still watch **precision** and the **share of firms flagged**, because experts have limited time.
+* I will still watch precision and the share of firms flagged, because experts have limited time.
 
-* To compare models fairly without choosing a threshold I use **ROC AUC** and **PR AUC** (area under the precision-recall curve; this is more informative than ROC AUC when positives are rare). Then I choose the final decision **threshold** separately, using the **F2 score**, which weights recall more heavily than precision.
+* To compare models fairly without choosing a threshold I use ROC AUC and PR AUC (area under the precision-recall curve; this is more informative than ROC AUC when positives are rare). Then I choose the final decision threshold separately, using the F2 score, which weights recall more heavily than precision.
 
 ## Data preparation
 
@@ -1243,12 +1342,7 @@ tibble(set = c("Training", "Test"),
   kable(caption = "Both sets keep the same share of controversial firms (stratified split)")
 ```
 
-**Findings:** the stratified split keeps the same class balance in both sets. The test set has only about 50 controversial firms, so test results will be noisy and I will report an uncertainty range later.
-
-```{r}
-#rm(firm_df, split_idx)
-graphics.off()
-```
+**Findings:** the stratified split keeps the same class balance in both sets. The test set has only `r sum(test$env_contro == "Yes")` controversial firms, so test results will be noisy and I will report an uncertainty range later.
 
 ### Pre-processing rules
 
@@ -1343,6 +1437,11 @@ sum(is.na(train_baked)) # must be 0
 cat("Predictors after pre-processing:", ncol(train_baked) - 1, "\n")
 ```
 
+```{r cleanup-21, include=FALSE}
+rm(firm_df, prep_obj, split_idx)
+graphics.off()
+```
+
 ## Exploratory data analysis and bivariate analysis (training data only)
 
 I explore only the training data so that the test set stays unseen.
@@ -1361,11 +1460,6 @@ train |>
 ```
 
 **Findings:** about 97% of firms have no controversy. Any model must handle this imbalance, otherwise it will simply predict "No" for everyone.
-
-```{r}
-#rm(test)
-graphics.off()
-```
 
 ### Industry and country
 
@@ -1401,12 +1495,7 @@ ph <- ggplot(hq_tbl, aes(x = rate, y = reorder(firm_hq, rate))) +
 wrap_plots(pi, ph, ncol = 1)
 ```
 
-**Findings:** controversy rates are clearly higher in resource-heavy industries (oil and gas and related services are far above average) and in some countries. This is a strong sign that **industry and country carry predictive information**, which is why I keep them (grouped) in the model.
-
-```{r}
-#rm(hq_tbl, ind_tbl, ph, pi) 
-graphics.off()
-```
+**Findings:** controversy rates are clearly higher in resource-heavy industries (oil and gas and related services are far above average) and in some countries. This is a strong sign that industry and country carry predictive information, which is why I keep them (grouped) in the model.
 
 ### Numeric variables by outcome (distributions and tests)
 
@@ -1446,12 +1535,7 @@ kable(num_tests, digits = c(0, 3, 3, 4, 0), format.args = list(big.mark = ",", s
 t.test(log10(marketcap + 1) ~ env_contro, data = train)
 ```
 
-**Findings:** I use the **Wilcoxon test** because these variables are very skewed and have outliers. Variables with small p-values (typically firm size measures such as market capitalisation, assets and revenue, and emissions) differ significantly between the two groups: controversial firms tend to be **bigger and higher-emitting**. The Welch t-test on log market capitalisation confirms the size difference. Remember that statistical significance only tells me a difference exists, not that it is large enough to predict well on its own.
-
-```{r}
-#rm(eda_long, test_vars, num_tests)
-graphics.off()
-```
+**Findings:** I use the Wilcoxon test because these variables are very skewed and have outliers. Variables with small p-values (typically firm size measures such as market capitalisation, assets and revenue, and emissions) differ significantly between the two groups: controversial firms tend to be bigger and higher-emitting. The Welch t-test on log market capitalisation confirms the size difference. Remember that statistical significance only tells me a difference exists, not that it is large enough to predict well on its own.
 
 ### Policies and controversy
 
@@ -1485,11 +1569,6 @@ pol_tbl |> mutate(across(starts_with("rate"), ~ percent(.x, accuracy = 0.1)), p_
 
 Chi-squared tests show which differences are statistically significant: in my output every policy difference is significant at the 5% level except the share of green products. This is an important reminder that the model finds associations, so it should be used for screening and not for blaming firms.
 
-```{r}
-#rm(pol_vars, pol_tbl)
-graphics.off()
-```
-
 ### Missing data as a signal and correlations
 
 ```{r firm-eda-missing, fig.height=4.5}
@@ -1514,7 +1593,8 @@ corrplot(cor(select(train_baked, all_of(cont_vars)), use = "pairwise.complete.ob
 
 **Findings:** firms that report emissions data are more often involved in controversies than firms that do not report (probably because reporting firms are larger and more visible). The correlation plot shows strong correlations among the size variables (assets, revenue, costs, market capitalisation, capex) and among the emission variables. This multicollinearity can make logistic regression coefficients unstable, and it is a good reason to try PCA.
 
-```{r}
+```{r cleanup-22, include=FALSE}
+rm(eda_long, hq_tbl, ind_tbl, num_tests, ph, pi, pol_tbl, pol_vars, test_vars)
 graphics.off()
 ```
 
@@ -1554,11 +1634,6 @@ ggplot(pca_scores |> arrange(env_contro), aes(PC1, PC2, colour = env_contro, alp
 ```
 
 **Findings:** the first components capture the size and emissions dimension (PC1) and the profitability / leverage dimension (later components). The scatter plot shows that the two groups overlap heavily: controversial firms are not separated cleanly from the others. This warns me that the prediction task is hard and that I should not expect a near-perfect model. I will use PCA as an alternative pre-processing choice for logistic regression in 4.6.
-
-```{r}
-#rm(pca_firm, cum_var)
-graphics.off()
-```
 
 ### Cluster analysis (k-means) of firms
 
@@ -1626,20 +1701,21 @@ These are the largest firms (median market capitalisation about USD `r comma(top
 
 This agrees with the Wilcoxon and policy results: **large, well-disclosing firms attract the most controversy**. Because the clusters were built without the outcome, this link is genuine information that the supervised models can also use.
 
-```{r}
-#rm(samp,sil_tbl, k_best, k_use, km_firm, cluster_tbl, top_cl, pca_scores, base_rate)
+```{r cleanup-23, include=FALSE}
+rm(base_rate, cluster_tbl, cum_var, k_best, k_use, km_firm, pca_firm, pca_scores, samp,
+   sil_tbl, top_cl)
 graphics.off()
 ```
 
 ## Resampling plan and metrics
 
-I use **5-fold cross-validation stratified by the outcome** on the training set. The training firms are split into five groups; each model is trained on four groups and scored on the fifth, and this is repeated five times. Every candidate model and every tuning value is therefore scored on data it was not trained on, which protects against overfitting. The pre-processing is re-learned inside each fold, so the validation fold never influences the medians or scaling.
+I use 5-fold cross-validation stratified by the outcome on the training set. The training firms are split into five groups; each model is trained on four groups and scored on the fifth, and this is repeated five times. Every candidate model and every tuning value is therefore scored on data it was not trained on, which protects against overfitting. The pre-processing is re-learned inside each fold, so the validation fold never influences the medians or scaling.
 
 I tune on **ROC AUC** and also record **PR AUC** (computed as average precision). The helper functions below build the folds, the metrics and the cross-validation loop.
 
 ```{r cv-folds}
 fold_id <- integer(nrow(train))
-for (cl in c("Yes", "No")) {                        # stratified: folds keep the share of positives
+for (cl in c("Yes", "No")) {  # stratified: folds keep the share of positives
   i <- which(train$env_contro == cl)
   fold_id[i] <- sample(rep(1:5, length.out = length(i)))
 }
@@ -1675,7 +1751,7 @@ fit_logit_pca <- function(tr, te, num_comp, ...) {
   suppressWarnings(predict(m, mk(te), type = "response"))
 }
 
-fit_enet <- function(tr, te, alpha, lambdas, ...) {      # returns one column per lambda
+fit_enet <- function(tr, te, alpha, lambdas, ...) { # returns one column per lambda
   m <- glmnet(as.matrix(x_of(tr)), y01(tr$env_contro), family = "binomial", alpha = alpha, lambda = lambdas)
   predict(m, as.matrix(x_of(te)), s = lambdas, type = "response")
 }
@@ -1716,6 +1792,11 @@ oof_pred <- function(fun, params) {
 }
 ```
 
+```{r cleanup-24, include=FALSE}
+rm(apply_prep, bin_vars, fold_id, learn_prep, na_vars, yj_lambda, yj_trans)
+graphics.off()
+```
+
 ## Models
 
 I build five candidate models, all using the same cross-validation folds so that the comparison is fair.
@@ -1730,7 +1811,7 @@ I build five candidate models, all using the same cross-validation folds so that
 
 **5. K-nearest neighbours (KNN):** Predicts from the most similar firms | I tune the number of neighbours.
 
-The model functions are in the chunk above (`fit_logit`, `fit_logit_pca`, `fit_enet`, `fit_tree`, `fit_knn`). Each one fits on a training set and returns the predicted **probability of a controversy** for new firms.
+The model functions are in the chunk above (`fit_logit`, `fit_logit_pca`, `fit_enet`, `fit_tree`, `fit_knn`). Each one fits on a training set and returns the predicted probability of a controversy for new firms.
 
 ### Fitting and tuning with cross-validation
 
@@ -1740,7 +1821,7 @@ res_log <- cv_grid(fit_logit, tibble(dummy = 1))
 res_pca <- cv_grid(fit_logit_pca, tibble(num_comp = c(3, 5, 8, 10, 12, 15)))
 
 # elastic net: for each alpha (0 = ridge, 1 = lasso) fit the whole penalty path at once
-lam_grid <- 10^seq(-0.5, -3, length.out = 20)          # decreasing path (glmnet needs to start from a large penalty)
+lam_grid <- 10^seq(-0.5, -3, length.out = 20) # decreasing path (glmnet needs to start from a large penalty)
 res_en <- map_dfr(c(0.25, 0.5, 1), function(a) {
   per_fold <- map(1:5, function(f) {
     d <- fold_data[[f]]
@@ -1785,6 +1866,11 @@ p_tree
 
 **Findings:** The tuning plots show how performance changes with the settings. For KNN, very small *k* gives noisy predictions (high variance) and larger *k* smooths the predictions, which improves AUC until it flattens. For the PCA model, too few components throw away useful information, while more components approach the plain logistic model. For the elastic net, too much penalty shrinks every coefficient towards zero and too little behaves like the plain logistic regression (many noisy coefficients), so performance peaks in between, and a mixture closer to ridge/lasso is chosen by the cross-validation. For the tree, very deep trees with small leaves can overfit; I choose the setting with the best cross-validated ROC AUC for each model.
 
+```{r cleanup-25, include=FALSE}
+rm(cv_grid, p_en, p_knn, p_pca, p_tree, res_en, res_knn, res_pca, res_tree, tree_grid)
+graphics.off()
+```
+
 ## Comparing the models using cross-validation
 
 ```{r cv-compare}
@@ -1811,17 +1897,18 @@ ggplot(cv_summary, aes(x = mean, y = reorder(model, mean), colour = metric)) +
 ```
 
 ```{r cv-curves, fig.height=6}
-fit_enet_best <- function(tr, te, alpha, lambda, ...) {      # one lambda taken from the fitted path
+fit_enet_best <- function(tr, te, alpha, lambda, ...) { 
+  # one lambda taken from the fitted path
   p <- fit_enet(tr, te, alpha, lam_grid)
   p[, which.min(abs(log10(lam_grid) - log10(lambda)))]
 }
 
 oof_preds <- bind_rows(
-  tibble(model = "Logistic regression",             .pred_Yes = oof_pred(fit_logit, list())),
-  tibble(model = "Logistic regression + PCA",       .pred_Yes = oof_pred(fit_logit_pca, list(num_comp = best_pca$num_comp))),
+  tibble(model = "Logistic regression", .pred_Yes = oof_pred(fit_logit, list())),
+  tibble(model = "Logistic regression + PCA", .pred_Yes = oof_pred(fit_logit_pca, list(num_comp = best_pca$num_comp))),
   tibble(model = "Elastic-net logistic regression", .pred_Yes = oof_pred(fit_enet_best, list(alpha = best_en$alpha, lambda = best_en$lambda))),
-  tibble(model = "Decision tree",                   .pred_Yes = oof_pred(fit_tree, list(cp = best_tree$cp, maxdepth = best_tree$maxdepth, minsplit = best_tree$minsplit))),
-  tibble(model = "KNN",                             .pred_Yes = oof_pred(fit_knn, list(k = best_knn$k)))
+  tibble(model = "Decision tree", .pred_Yes = oof_pred(fit_tree, list(cp = best_tree$cp, maxdepth = best_tree$maxdepth, minsplit = best_tree$minsplit))),
+  tibble(model = "KNN", .pred_Yes = oof_pred(fit_knn, list(k = best_knn$k)))
 ) |> mutate(env_contro = rep(train$env_contro, 5))
 
 roc_points <- function(y, p) {
@@ -1857,9 +1944,15 @@ tree_row <- filter(cv_table, model == "Decision tree")
 
 **Findings:** The best model in cross-validation is **`r best_name`** with a ROC AUC of about `r round(best_cv_auc, 3)`. An AUC of 0.5 is random guessing and 1.0 is perfect, so my values of roughly 0.65 to 0.72 mean the models are better than chance but only modestly, which is consistent with the heavy overlap I saw in the PCA plot. The penalised (elastic-net) logistic regression is ahead, which makes sense because it shrinks the many noisy and correlated coefficients that hurt the plain logistic regression. However, its lead over plain logistic regression, logistic regression with PCA and KNN is small compared with the standard errors, so I should not claim the ranking among these four is certain. The **decision tree is clearly the weakest** (AUC about `r round(tree_row$mean_roc_auc, 2)`): a single tree is unstable and this data has weak, noisy signals. The PR AUC values are low in absolute terms because only 2.8% of firms are positive (a random model would score about 0.03), so I judge them against that baseline and not against 1; the best models are roughly four to five times better than random on this measure.
 
+```{r cleanup-26, include=FALSE}
+rm(cv_summary, cv_table, fold_data, oof_pred, pr_df, pr_plot, pr_points, res_log, roc_df,
+   roc_plot, train, tree_row)
+graphics.off()
+```
+
 ## Choosing the decision threshold (using the cost of errors)
 
-A classification model gives a **probability**, and I must choose a cut-off above which a firm is flagged. The default cut-off of 0.5 is far too high here, because predicted probabilities are small when the event is rare. Since false positives are cheap and false negatives are costly, I choose the cut-off that maximises the **F2 score** on the **out-of-fold training predictions** (not on the test set). F2 is the F-score that treats recall as twice as important as precision. I also show some alternative operating points.
+A classification model gives a probability, and I must choose a cut-off above which a firm is flagged. The default cut-off of 0.5 is far too high here, because predicted probabilities are small when the event is rare. Since false positives are cheap and false negatives are costly, I choose the cut-off that maximises the F2 score on the out-of-fold training predictions (not on the test set). F2 is the F-score that treats recall as twice as important as precision. I also show some alternative operating points.
 
 ```{r threshold}
 conf_counts <- function(truth, pred_class) {
@@ -1915,6 +2008,11 @@ bind_rows(best_thr |> mutate(target_recall = NA_real_, choice = "Best F2 (my cho
 
 **Findings:** The plot shows the classic trade-off: lowering the threshold catches more controversial firms (higher sensitivity) but flags many more firms (lower precision and specificity). The table translates this into workload. For example, to catch a given share of risky firms the experts must review the percentage of firms shown in the "Firms flagged" column. Because the model is only moderately accurate, catching most risky firms needs a very low threshold and a large review workload (catching about 80% of risky firms means reviewing more than half of all firms). I use the best-F2 threshold as my default recommendation because it reflects the stated cost structure (missing a risky firm is worse than reviewing a safe one) while keeping the review list short. If the experts have more capacity, the manager can pick a lower threshold from the table; if capacity is tight, a higher one.
 
+```{r cleanup-27, include=FALSE}
+rm(cand_thresholds, eval_threshold, oof_best, oof_preds, op_points, targets, thr_tbl)
+graphics.off()
+```
+
 ## Final evaluation on the test set
 
 Now I refit the best model on the whole training set, predict on the test set (the first time it is used), and apply the threshold I chose in 4.8. This gives an honest estimate of how the model would work on new firms.
@@ -1922,11 +2020,11 @@ Now I refit the best model on the whole training set, predict on the test set (t
 ```{r final-fit}
 predict_final <- function(name, tr, te) {
   switch(name,
-    "Logistic regression"             = fit_logit(tr, te),
-    "Logistic regression + PCA"       = fit_logit_pca(tr, te, num_comp = best_pca$num_comp),
+    "Logistic regression" = fit_logit(tr, te),
+    "Logistic regression + PCA" = fit_logit_pca(tr, te, num_comp = best_pca$num_comp),
     "Elastic-net logistic regression" = fit_enet_best(tr, te, best_en$alpha, best_en$lambda),
-    "Decision tree"                   = fit_tree(tr, te, best_tree$cp, best_tree$maxdepth, best_tree$minsplit),
-    "KNN"                             = fit_knn(tr, te, best_knn$k))
+    "Decision tree" = fit_tree(tr, te, best_tree$cp, best_tree$maxdepth, best_tree$minsplit),
+    "KNN" = fit_knn(tr, te, best_knn$k))
 }
 
 test_pred <- tibble(env_contro = test$env_contro,
@@ -2011,9 +2109,17 @@ sens_boot  <- boot_stats$sens
 
 * **Accuracy looks worse** (`r percent(get_m(tm, "accuracy"), accuracy = 1)`) than for the default 0.5 rule (`r percent(get_m(tm_def, "accuracy"), accuracy = 1)`), but that is misleading: the default rule is accurate only because it almost never flags a firm. Its sensitivity is just `r percent(get_m(tm_def, "sens"), accuracy = 1)`, so it would miss nearly every risky firm. This is the accuracy paradox for imbalanced data.
 
-* The **gain curve** shows how much better than random the ranking is: the further the curve is above the diagonal, the more controversial firms are found early when experts review firms in order of predicted risk.
+* The gain curve shows how much better than random the ranking is: the further the curve is above the diagonal, the more controversial firms are found early when experts review firms in order of predicted risk.
 
-* The **bootstrap confidence intervals** are wide because the test set contains only about `r n_pos_test` positives. I should therefore present performance as a *range* (for example AUC between about `r round(quantile(auc_boot, 0.025), 2)` and `r round(quantile(auc_boot, 0.975), 2)`) and not as a precise number.
+* The bootstrap confidence intervals are wide because the test set contains only about `r n_pos_test` positives. I should therefore present performance as a *range* (for example AUC between about `r round(quantile(auc_boot, 0.025), 2)` and `r round(quantile(auc_boot, 0.975), 2)`) and not as a precise number.
+
+```{r cleanup-28, include=FALSE}
+rm(ap_fn, auc_boot, auc_fn, best_en, best_knn, best_pca, best_thr, boot_stats, class_metrics,
+   cm, cm_plot, conf_counts, cont_vars, fit_enet, fit_enet_best, fit_knn, fit_logit,
+   fit_logit_pca, fit_tree, gain_df, i, lam_grid, n_pos_test, predict_final, roc_points,
+   roc_test, sens_boot, test, test_baked, tm_def)
+graphics.off()
+```
 
 ## What drives the predictions? (model interpretation)
 
@@ -2021,7 +2127,7 @@ I fit the logistic regression and the decision tree on the training data to see 
 
 ### Logistic regression: odds ratios
 
-The continuous variables are standardised, so each odds ratio shows how the odds of a controversy change when the variable increases by **one standard deviation** (of its transformed version). A value above 1 means higher risk; below 1 means lower risk. The confidence intervals here are Wald intervals (estimate plus or minus 1.96 standard errors).
+The continuous variables are standardised, so each odds ratio shows how the odds of a controversy change when the variable increases by one standard deviation (of its transformed version). A value above 1 means higher risk; below 1 means lower risk. The confidence intervals here are Wald intervals (estimate plus or minus 1.96 standard errors).
 
 ```{r interpret-logit, fig.height=7}
 glm_fit <- suppressWarnings(glm(y ~ ., data = cbind(x_of(train_baked), y = y01(train_baked$env_contro)), family = binomial))
@@ -2052,13 +2158,24 @@ or_tbl |> arrange(p.value) |> head(10) |>
 ### Decision tree: rules and variable importance
 
 ```{r interpret-tree, fig.height=7}
-tree_engine <- rpart(env_contro ~ ., data = train_baked, method = "class", parms = list(prior = c(0.5, 0.5)),
-                     control = rpart.control(cp = best_tree$cp, maxdepth = best_tree$maxdepth,
-                                             minsplit = best_tree$minsplit, xval = 0))
+tree_engine <- rpart(env_contro ~ ., 
+                     data = train_baked, 
+                     method = "class", 
+                     parms = list(prior = c(0.5, 0.5)),
+                     control = rpart.control(cp = best_tree$cp, 
+                                             maxdepth = best_tree$maxdepth,
+                                             minsplit = best_tree$minsplit, 
+                                             xval = 0))
 
 # the best tree from tuning is deep (hard to read), so I draw a simplified tree with the same settings but only 3 levels
-tree_simple <- rpart(env_contro ~ ., data = train_baked, method = "class", parms = list(prior = c(0.5, 0.5)),
-                     control = rpart.control(cp = 0.01, maxdepth = 3, minsplit = 60, xval = 0))
+tree_simple <- rpart(env_contro ~ ., 
+                     data = train_baked, 
+                     method = "class", 
+                     parms = list(prior = c(0.5, 0.5)),
+                     control = rpart.control(cp = 0.01, 
+                                             maxdepth = 3, 
+                                             minsplit = 60, 
+                                             xval = 0))
 
 if (nrow(tree_simple$frame) > 1) {
   if (requireNamespace("rpart.plot", quietly = TRUE)) {
@@ -2083,7 +2200,13 @@ if (!is.null(imp)) {
 }
 ```
 
-**Findings:** the tree shows simple "if-then" rules. For readability I draw a simplified three-level tree: the first split is the variable that best separates controversial from non-controversial firms, and boxes with a high share of "Yes" are the high-risk segments that experts should look at first. The variable importance chart comes from the full tuned tree. In my run the most important variables are the size and cost variables (capital expenditure, revenue, cost of revenue and market capitalisation), which agrees with the logistic regression and the clustering result: **size drives most of the predictable risk**. A single tree is easy to explain, but it is less stable and less accurate than the other models here, so I use it for explanation and not as the final predictor.
+**Findings:** the tree shows simple "if-then" rules. For readability I draw a simplified three-level tree: the first split is the variable that best separates controversial from non-controversial firms, and boxes with a high share of "Yes" are the high-risk segments that experts should look at first. The variable importance chart comes from the full tuned tree. In my run the most important variables are the size and cost variables (capital expenditure, revenue, cost of revenue and market capitalisation), which agrees with the logistic regression and the clustering result: size drives most of the predictable risk. A single tree is easy to explain, but it is less stable and less accurate than the other models here, so I use it for explanation and not as the final predictor.
+
+```{r cleanup-29, include=FALSE}
+rm(best_tree, cf, col_accent, col_grey, col_main, glm_fit, imp, or_tbl, train_baked,
+   tree_engine, tree_simple, x_of, y01)
+graphics.off()
+```
 
 ## Conclusions and recommendations
 
@@ -2100,23 +2223,29 @@ n_flagged_test <- sum(test_pred$pred_class == "Yes")
 4. **Why the threshold matters:** because false positives are cheap, I lowered the threshold far below 0.5. The default 0.5 would give impressive accuracy but would miss almost all risky firms.
 
 5. **Limitations:**
-   * Only about 200 of the 7,275 firms have a controversy, so estimates are uncertain (see the bootstrap intervals).
+   * Only `r sum(firms$env_contro == "Yes")` of the `r comma(nrow(firms))` firms have a controversy, so estimates are uncertain (see the bootstrap intervals).
    
    * `env_contro` is based on news data, so it measures *media-visible* controversies, which are biased towards large firms in well-covered countries.
    
    * Many predictors have missing values, which I handled with median imputation and missing-value indicators.
    
    * The model finds associations, not causes, and it should not be used to blame firms without expert review.
+
+```{r cleanup-30, include=FALSE}
+rm(best_cv_auc, best_name, firms, get_m, n_flagged_test, test_auc, test_pred, tm)
+graphics.off()
+```
    
 # Overall conclusions:
 
 **1. Most common climate hazards:** Extreme heat, urban flooding and drought are the most reported hazards; by family, flooding / heavy rain, heat and drought / water scarcity affect the most communities. Cities typically face about five hazards at once.
 
-**2. Planned projects and funding by region:** Project counts are spread across regions, but money is concentrated (UKWW dominates). Three impossible cost values were removed.
+**2. Planned projects and funding by region:** Project counts are spread across regions, but money is concentrated (UKWW dominates). `r sum(projects$cost_error, na.rm = TRUE)` impossible cost values were removed, and a stricter check (excluding costs above the project's own total cost) is also shown.
 
-**3. Ranked investment opportunities:** 31 waste-management projects from cities with confirmed business collaboration and loan / PPP funding models, ranked by investment cost.
+**3. Ranked investment opportunities:** `r nrow(ranked)` waste-management projects from cities with confirmed business collaboration and loan / PPP funding models, ranked by investment cost.
 
 **4. Environmental controversy model:** A cross-validated, threshold-tuned screening model with moderate discriminating power; best used to prioritise firms for expert review.
+
 
 ```{r}
 # 1. Clear variables
@@ -2131,12 +2260,15 @@ gc()
 
 # GenAI Declaration
 
-I used ChatGpt, Claude and Copilot AI as a supporting tool during this assignment. The tool was used for brainstorming, understanding and shortening R syntax, troubleshooting code, suggesting ways to structure the analysis, and improving explanations and writing.
+**Tools used:** ChatGPT, Claude and Copilot (generative AI assistants).
 
-I used GenAI as a supporting tool. I checked the suggested R code against the assignment requirements and ran the code in R using the supplied dataset. I also inspected the data, outputs, statistical results, tables and visualizations myself and made the final decisions about data preparation, analysis and interpretation. Where GenAI suggestions were used, I verified that they were appropriate for the variables and statistical techniques covered in the course.
+**Purpose of use:** brainstorming, understanding and shortening R syntax, troubleshooting code errors, suggesting ways to structure the analysis, and improving explanations and writing.
 
-# Session information
+**Extent of use:** the tools were a supporting aid throughout the assignment, for code suggestions, debugging help and the wording of explanations. They did not produce any results: every table, figure and number in this report comes from running the R code in this file on the supplied datasets, and wherever possible the numbers in the written findings are inserted by inline R code rather than typed by hand. The data-cleaning rules (for example the cost-outlier rules and the definition of a waste project), the choice of methods, the interpretation of results and the final conclusions are my own decisions.
 
-```{r session-info}
-sessionInfo()
-```
+**Steps taken to verify the accuracy of the GenAI output:**
+
+1. I checked every suggested piece of R code against the assignment requirements and ran it myself in R on the supplied dataset.
+2. I inspected the data, outputs, statistical results, tables and visualizations myself and checked that the written findings match them.
+3. I checked that each suggested method was appropriate for the variables in the data and for the techniques covered in the course.
+4. I ran the whole file from a clean R session and confirmed that it knits to HTML without errors.
